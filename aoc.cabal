@@ -3,17 +3,15 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.35.0.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 74a518596623333f54debbd08849a3f5a987e3c7d13d8b337ef10b1fc25ba29c
 
-name:           aoc-template
+name:           aoc
 version:        2022.0
-description:    A template for Advent of Code projects in Haskell
-homepage:       https://github.com/samcoy3/advent-of-code-template#readme
-bug-reports:    https://github.com/samcoy3/advent-of-code-template/issues
-author:         Sam Coy
-maintainer:     samcoy3@gmail.com
-copyright:      2022 Sam Coy
+description:    2022 Advent of Code projects in Haskell
+homepage:       https://github.com/Jtag84/adventOfCodeHaskell#readme
+bug-reports:    https://github.com/Jtag84/adventOfCodeHaskell/issues
+author:         Clement
+maintainer:     Clement
+copyright:      2022 Clement
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -22,7 +20,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/samcoy3/advent-of-code-template
+  location: https://github.com/Jtag84/adventOfCodeHaskell
 
 library
   exposed-modules:
@@ -53,61 +51,73 @@ library
       Days.Day25
       Program.Color
       Program.RunDay
+      Util.Coordinate
       Util.Pair
       Util.Parsers
+      Util.Range
       Util.Util
   other-modules:
-      Paths_aoc_template
+      Paths_aoc
   hs-source-dirs:
       src
   default-extensions:
-      LambdaCase
-      MultiWayIf
-      RecordWildCards
-      OverloadedRecordDot
-      OverloadedStrings
       GADTs
       GHC2021
+      LambdaCase
+      MultiWayIf
+      OverloadedRecordDot
+      OverloadedStrings
+      RecordWildCards
   build-depends:
       ansi-terminal
     , attoparsec
     , base >=4.7 && <5
     , containers
     , directory
+    , matrix
     , mtl
     , optparse-applicative
+    , parallel
     , parser-combinators
+    , safe
+    , scientific
     , text
     , time
+    , tuple
     , vector
   default-language: Haskell2010
 
-executable aoc-template-exe
+executable aoc-exe
   main-is: Main.hs
   other-modules:
-      Paths_aoc_template
+      Paths_aoc
   hs-source-dirs:
       app
   default-extensions:
-      LambdaCase
-      MultiWayIf
-      RecordWildCards
-      OverloadedRecordDot
-      OverloadedStrings
       GADTs
       GHC2021
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N4 -with-rtsopts=-qa -with-rtsopts=-C0 -funfolding-use-threshold=16 -fexcess-precision -optc-O3 -optc-ffast-math -O2
+      LambdaCase
+      MultiWayIf
+      OverloadedRecordDot
+      OverloadedStrings
+      RecordWildCards
+  ghc-options: -fexcess-precision -funfolding-use-threshold=16 -O2 -optc-ffast-math -optc-O3 -rtsopts -threaded -with-rtsopts=-C0 -with-rtsopts=-N4 -with-rtsopts=-qa
   build-depends:
       ansi-terminal
-    , aoc-template
+    , aoc
     , attoparsec
     , base >=4.7 && <5
     , containers
     , directory
+    , matrix
     , mtl
     , optparse-applicative
+    , parallel
     , parser-combinators
+    , safe
+    , scientific
     , text
     , time
+    , tuple
     , vector
   default-language: Haskell2010

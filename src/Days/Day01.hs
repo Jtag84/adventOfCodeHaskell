@@ -1,39 +1,45 @@
 module Days.Day01 (runDay) where
 
-{- ORMOLU_DISABLE -}
-import Data.List
-import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
-import Data.Maybe
-import Data.Set (Set)
-import qualified Data.Set as Set
-import Data.Vector (Vector)
-import qualified Data.Vector as Vec
-import qualified Util.Util as U
+import Data.Attoparsec.Text (Parser, endOfInput, endOfLine, many', scientific, parseOnly)
+import Data.List (sort)
+import Data.Scientific (Scientific, toBoundedInteger)
+import Program.RunDay qualified as R (Day, runDay)
+import Data.Maybe (fromMaybe, fromJust)
+import Options.Applicative ((<|>))
 
-import qualified Program.RunDay as R (runDay, Day)
-import Data.Attoparsec.Text
-import Data.Void
-{- ORMOLU_ENABLE -}
 
 runDay :: R.Day
-runDay = R.runDay inputParser partA partB
+runDay = R.runDay rucksacParser partA partB
 
 ------------ PARSER ------------
-inputParser :: Parser Input
-inputParser = error "Not implemented yet!"
+-- >>> parseOnly rucksacParser "123\n345\n4"
+-- ProgressCancelledException
+rucksacParser :: Parser Rucksac
+rucksacParser = many' elfParser
+
+-- >>> parseOnly elfParser "123\n345\n43"
+-- Right [123,345,43]
+elfParser :: Parser Elf
+elfParser = many' caloryParser 
+
+-- >>> parseOnly caloryParser "123\n345"
+-- Right 123
+caloryParser :: Parser Calory
+caloryParser = fromJust . toBoundedInteger <$> scientific <* (endOfLine <|> endOfInput)
 
 ------------ TYPES ------------
-type Input = Void
+type Rucksac = [Elf]
 
-type OutputA = Void
+type Elf = [Calory]
 
-type OutputB = Void
+type Calory = Int
 
 ------------ PART A ------------
-partA :: Input -> OutputA
-partA = error "Not implemented yet!"
+-- >>> partA [[1,2,3],[3,4]]
+-- 7
+partA :: Rucksac -> Calory
+partA = maximum . map sum
 
 ------------ PART B ------------
-partB :: Input -> OutputB
-partB = error "Not implemented yet!"
+partB :: Rucksac -> Calory
+partB = sum . take 3 . reverse . sort . map sum

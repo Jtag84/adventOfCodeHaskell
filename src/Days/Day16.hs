@@ -20,26 +20,20 @@ import Control.Monad.State
 import Data.Function (on)
 import Data.Tuple.All (Sel1(sel1), Sel3 (sel3))
 import Safe (headDef)
-import Control.Parallel.Strategies (withStrategy, parBuffer, rseq)
+import Control.Parallel.Strategies (withStrategy, parBuffer, rseq, parList, rpar)
 import Data.Either (fromLeft, lefts, rights)
+import Data.Foldable (foldlM)
 
 
 runDay :: R.Day
 runDay = R.runDay inputParser partA partB
 
 ------------ TYPES ------------
-type Input = Void
-
-type OutputA = Void
-
-type OutputB = Void
-
 type ValveId = Text
 
 type NextValveIds = [ValveId]
 
 type Path = [ValveId]
-
 
 type FlowRate = Int
 type FlowRates = [FlowRate]
@@ -47,6 +41,8 @@ type FlowRates = [FlowRate]
 type Valve = (ValveId, (FlowRate, NextValveIds))
 
 type Cave = Map ValveId (FlowRate, NextValveIds)
+
+type CacheFromToValve = Map (ValveId, ValveId) Path
 
 ------------ PARSER ------------
 inputParser :: Parser Cave
@@ -70,173 +66,130 @@ valveParser = do
     nextValves <- nextValvesParser
     return (valveId, (flowRate, nextValves))
 
-
 ------------ PART A ------------
-getMaxFlowRatePath :: Cave -> Int -> ValveId -> ((FlowRate, FlowRates, Path, Set ValveId), Cache)
-getMaxFlowRatePath cave minutes valveId = runState (getMaxFlowRatePathWithCache cave allValvesThatCanBeOpened (minutes - 1) (0, [0], [valveId], Set.empty) valveId) Map.empty
+
+-- >>> evalState (getTotalFlowRateFromPathToValveId (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) [0] ["AA"] "DD") Map.empty
+-- ([0,0,0],["DD","AA"])
+-- >>> evalState (getTotalFlowRateFromPathToValveId (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) [0,0,0] ["DD","AA"] "BB") Map.empty
+-- ([20,20,20,0,0,0],["BB","CC","DD","AA"])
+-- >>> evalState (getTotalFlowRateFromPathToValveId (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) [33,33,33,33,20,20,20,0,0,0] ["JJ","II","AA","BB","CC","DD","AA"] "HH") Map.empty
+-- ([54,54,54,54,54,54,54,54,33,33,33,33,20,20,20,0,0,0],["HH","GG","FF","EE","DD","AA","II","JJ","II","AA","BB","CC","DD","AA"])
+-- >>> evalState (getTotalFlowRateFromPathToValveId (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) [0] ["AA"] "BB") Map.empty
+-- ([0,0,0],["BB","AA"])
+-- >>> evalState (getTotalFlowRateFromPathToValveId (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) [13,0,0] ["CC","BB","AA"] "DD") Map.empty
+-- ([15,15,13,0,0],["DD","CC","BB","AA"])
+-- >>> evalState (getTotalFlowRateFromPathToValveId (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) [20,20,20,0,0] ["BB","CC","DD","AA"] "JJ") Map.empty
+-- ([33,33,33,33,20,20,20,0,0],["JJ","II","AA","BB","CC","DD","AA"])
+getTotalFlowRateFromPathToValveId :: Cave -> FlowRates -> Path -> ValveId -> State CacheFromToValve (Maybe (FlowRates, Path))
+getTotalFlowRateFromPathToValveId cave currentFlowRates currentPath toValveId = do
+    maybeNewPath <- getFastestPath cave currentValveId toValveId
+    case maybeNewPath of
+        Nothing -> return Nothing
+        Just newPath -> do
+            let newPathSize = length newPath
+            let newFlowRate = lastMinuteFlowRate + newFlow
+            let newFlowRates = replicate newPathSize newFlowRate <> currentFlowRates
+            return $ Just (newFlowRates, newPath <> tail currentPath)
     where
-        allValvesThatCanBeOpened = Set.fromList . map fst . filter ((0 <) . fst . snd ) $ Map.toList cave
+        currentValveId = head currentPath
+        newFlow = sel1 $ cave Map.! currentValveId
+        lastMinuteFlowRate = headDef 0 currentFlowRates
 
-type Cache = Map (ValveId, Int, Set ValveId, FlowRate) (FlowRate, FlowRates, Path, Set ValveId)
-
-getMaxFlowRatePathWithCache :: Cave -> Set ValveId -> Int -> (FlowRate, FlowRates, Path, Set ValveId)  -> ValveId -> State Cache (FlowRate, FlowRates, Path, Set ValveId)
-getMaxFlowRatePathWithCache cave allValvesThatCanBeOpened minutes flowRatePath@(totalFlowRate, flowRates, path, openedValves) valveId
-    | openedValves == allValvesThatCanBeOpened = return (totalFlowRate + lastFlowRate * minutes, replicate minutes lastFlowRate <> flowRates, path, openedValves)
-    | minutes <= 0 = return flowRatePath
-    | otherwise = do
+-- >>> evalState (getFastestPath (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) "AA" "DD") Map.empty
+-- ["DD","AA"]
+getFastestPath :: Cave -> ValveId -> ValveId -> State CacheFromToValve (Maybe Path)
+getFastestPath cave from to = do
         inCache <- isInCache
         if inCache 
         then 
-            getFromCache
+            Just <$> getFromCache
         else do
-            bestFlowRatePath <- getBestFlowRatePath
-            modify (Map.insert (valveId, minutes, openedValves, totalFlowRate) bestFlowRatePath)
-            return bestFlowRatePath
-
+            bestPath <- getBestPath cave from to Set.empty [] 
+            if isJust bestPath 
+            then
+                do
+                modify (Map.insert (from, to) (fromJust bestPath))
+                return bestPath
+            else
+                return bestPath
     where
-        getBestFlowRatePath :: State Cache (FlowRate, FlowRates, Path, Set ValveId)
-        getBestFlowRatePath = do
-            if (currentValveFlow > 0) && (valveId `Set.notMember` openedValves)
-                then
-                    do
-                    openedValvePath <- openingValve
-                    notOpenedValvePath <- goToNextValves
-                    return $ maximumBy (compare `on` sel1) $ withStrategy (parBuffer 40 rseq) [openedValvePath, notOpenedValvePath]
-                else
-                    goToNextValves
-
-        isInCache :: State Cache Bool
+        isInCache :: State CacheFromToValve Bool
         isInCache = do
             cache <- get
-            return $ (valveId, minutes, openedValves, totalFlowRate) `Map.member` cache
+            return $ (from, to) `Map.member` cache
 
-        getFromCache :: State Cache (FlowRate, FlowRates, Path, Set ValveId)
+        getFromCache :: State CacheFromToValve Path
         getFromCache = do
             cache <- get
-            return $ cache Map.! (valveId, minutes, openedValves, totalFlowRate)
+            return $ cache Map.! (from, to)
 
-        goToNextValves :: State Cache (FlowRate, FlowRates, Path, Set ValveId)
-        goToNextValves = do
-            flowRatePaths <- mapM getMaxFlowRateFromNextValves currentNextValves
-            return $ maximumBy (compare `on` sel1) flowRatePaths
+-- >>> evalState (getBestPath (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) "AA" "GG" Set.empty []) Map.empty
+-- Just ["GG","FF","EE","DD","AA"]
+getBestPath :: Cave -> ValveId -> ValveId -> Set ValveId -> Path -> State CacheFromToValve (Maybe Path)
+getBestPath cave from to alreadyVisited path
+    | from `Set.member` alreadyVisited = return Nothing
+    -- | length path > 1 = return Nothing
+    | from == to = return $ Just (from:path)
+    | otherwise = do
+        let nextValveIds = snd $ cave Map.! from 
+        let newAlreadyVisited = Set.insert from alreadyVisited
+        paths <- mapM (\nextValve -> getBestPath cave nextValve to newAlreadyVisited (from:path)) nextValveIds
+        let justPaths = filter isJust paths
+        if not $ null justPaths
+        then
+            return $ minimumBy (compare `on` fmap length) justPaths
+        else 
+            return Nothing
 
-        getMaxFlowRateFromNextValves :: ValveId -> State Cache (FlowRate, FlowRates, Path, Set ValveId)
-        getMaxFlowRateFromNextValves nextValveId = do
-            let nextMinutes = minutes - 1
-            let newFlowRatePath = (totalFlowRate + lastFlowRate, lastFlowRate:flowRates, nextValveId:path, openedValves)
-            getMaxFlowRatePathWithCache cave allValvesThatCanBeOpened nextMinutes newFlowRatePath nextValveId
+-- >>> evalState (getBestFlowRate (Map.fromList [("AA",(0,["DD","II","BB"])),("BB",(13,["CC","AA"])),("CC",(2,["DD","BB"])),("DD",(20,["CC","AA","EE"])),("EE",(3,["FF","DD"])),("FF",(0,["EE","GG"])),("GG",(0,["FF","HH"])),("HH",(22,["GG"])),("II",(0,["AA","JJ"])),("JJ",(21,["II"]))]) 30 "AA" (Set.fromList ["CC","DD","BB","EE","HH","JJ"])) Map.empty
+-- (1651,[81,81,81,81,81,81,79,79,79,76,76,76,76,54,54,54,54,54,54,54,54,33,33,33,33,20,20,20,0,0],["CC","DD","EE","FF","GG","HH","GG","FF","EE","DD","AA","II","JJ","II","AA","BB","CC","DD","AA"])
+getBestFlowRate :: Cave -> Int -> ValveId -> Set ValveId -> State CacheFromToValve (FlowRate, FlowRates, Path)
+getBestFlowRate cave minutes initialValveId valvesToOpen = do
+    let allAlternatesValvesOrderToOpen = permutations $ Data.List.take 3 $ Set.toList valvesToOpen
+    allPathFlowRates <- mapM getBestPathTotalFlowRate allAlternatesValvesOrderToOpen
+    return $ maximumBy (compare `on` sel1) $ withStrategy (parBuffer 40 rseq) $ catMaybes allPathFlowRates
+    where
+        getBestPathTotalFlowRate :: NextValveIds -> State CacheFromToValve (Maybe (FlowRate, FlowRates, Path))
+        getBestPathTotalFlowRate = buildBestPathTotalFlowRate [] [initialValveId]
 
-        openingValve :: State Cache (FlowRate, FlowRates, Path, Set ValveId)
-        openingValve = do
-            let nextMinutes = minutes - 1
-            let newOpenedVaves = Set.insert valveId openedValves
-            let newFlowRatePath = (totalFlowRate + lastFlowRate + currentValveFlow, (lastFlowRate + currentValveFlow):flowRates, path, newOpenedVaves)
-            getMaxFlowRatePathWithCache cave allValvesThatCanBeOpened nextMinutes newFlowRatePath valveId
+        buildBestPathTotalFlowRate currentFlowRates currentPath [] = do
+            let lastValveId = head currentPath
+            let lastFlow = sel1 (cave Map.! lastValveId) + headDef 0 currentFlowRates
+            let finalFlowRates = replicate (minutes - length currentFlowRates) lastFlow <> currentFlowRates
+            return $ Just (sum finalFlowRates, finalFlowRates, currentPath)
+        buildBestPathTotalFlowRate currentFlowRates currentPath (nextValveId:nextValveIds) = do 
+            maybeTotalFlowRate <- getTotalFlowRateFromPathToValveId cave currentFlowRates currentPath nextValveId
+            case maybeTotalFlowRate of
+                Nothing -> return Nothing
+                Just (newFlowRates, newPath) -> do
+                    if length newFlowRates >= minutes
+                    then
+                        do
+                        let finalFlowRates = Data.List.drop (length newFlowRates - minutes) newFlowRates
+                        return $ Just (sum finalFlowRates, finalFlowRates, currentPath)
+                    else
+                        buildBestPathTotalFlowRate newFlowRates newPath nextValveIds
+allValvesThatCanBeOpened = Set.fromList . map fst . filter ((0 <) . fst . snd ) . Map.toList 
 
-        lastFlowRate = headDef 0 flowRates
-        
-        currentValve = cave Map.! valveId 
-        currentValveFlow = fst currentValve
-        currentNextValves = snd currentValve
-
-partA :: Cave -> (FlowRate, FlowRates, Path, Set ValveId)
--- partA cave = sel1 $ getMaxFlowRatePath cave 30 "AA"
-partA cave = error "Not implemented yet!"
+partA cave = evalState (getBestFlowRate cave 30 "AA" (allValvesThatCanBeOpened cave)) Map.empty
 
 ------------ PART B ------------
 
-type CachePartB = Map (Set ValveId, Int, Set ValveId, FlowRate) TotalFlowRateState
+partB cave = evalState (getBestFlowRateWithElephant cave 26 "AA" (allValvesThatCanBeOpened cave)) Map.empty
 
-type OpenedValves = Set ValveId
 
-type TotalFlowRate = Int
-
-type TotalFlowRateState = (TotalFlowRate, FlowRates, (Path, Path), OpenedValves)
-
-type OpenCloseValveId = Either ValveId ValveId 
-
-getMaxFlowRatePath2Persons :: Cave -> Int -> [ValveId] -> (TotalFlowRateState, CachePartB)
-getMaxFlowRatePath2Persons cave minutes valveIds = runState (getMaxFlowRatePath2PersonsWithCache cave allValvesThatCanBeOpened (minutes - 1) (0, [0], (valveIds, valveIds), Set.empty)) Map.empty
+getBestFlowRateWithElephant :: Cave -> Int -> ValveId -> Set ValveId -> State CacheFromToValve (FlowRate, FlowRates, (Path, Path))
+getBestFlowRateWithElephant cave initialMinutes initialValveId allValvesThatCanBeOpened = do
+    let allSubsequeces = subsequences $ Set.toList allValvesThatCanBeOpened
+    let halfSubsequences = Data.List.take (round (fromIntegral (length allSubsequeces) / 2)) allSubsequeces
+    allFlows <- mapM (getBestFlowRateWithElephantWithValves . Set.fromList) halfSubsequences
+    return $ maxFlow $ withStrategy (parBuffer 40 rseq) allFlows
     where
-        allValvesThatCanBeOpened = Set.fromList . map fst . filter ((0 <) . fst . snd ) $ Map.toList cave
+        getBestFlowRateWithElephantWithValves :: Set ValveId -> State CacheFromToValve (FlowRate, FlowRates, (Path, Path))
+        getBestFlowRateWithElephantWithValves valvesToOpenForPerson = do
+            let valvesToOpenForElephant = allValvesThatCanBeOpened Set.\\ valvesToOpenForPerson
+            (totalFlowRatePerson, flowRatesPerson, pathPerson) <- getBestFlowRate cave initialMinutes "AA" valvesToOpenForPerson
+            (totalFlowRateElephant, flowRatesElephant, pathElephant) <-  getBestFlowRate cave initialMinutes "AA" valvesToOpenForElephant
+            return (totalFlowRateElephant + totalFlowRatePerson, zipWith (+) flowRatesPerson flowRatesElephant , (pathPerson, pathElephant))
 
-getMaxFlowRatePath2PersonsWithCache :: Cave -> Set ValveId -> Int -> TotalFlowRateState -> State CachePartB TotalFlowRateState
-getMaxFlowRatePath2PersonsWithCache cave allValvesThatCanBeOpened minutes flowRatePath@(totalFlowRate, flowRates, paths@(leftPath, rightPath), openedValves)
-    | openedValves == allValvesThatCanBeOpened = return (totalFlowRate + lastFlowRate * minutes, replicate minutes lastFlowRate <> flowRates, paths, openedValves)
-    | minutes <= 0 = return flowRatePath
-    | otherwise = do
-        inCache <- isInCache
-        if inCache 
-        then 
-            getFromCache
-        else do
-            bestFlowRatePath <- getBestFlowRatePath
-            modify (Map.insert (currentValveIdsSet, minutes, openedValves, totalFlowRate) bestFlowRatePath)
-            return bestFlowRatePath
-
-    where
-        getBestFlowRatePath :: State CachePartB TotalFlowRateState
-        getBestFlowRatePath = do
-            leftOpenRightClose <- openValvesOrGoToNext (open leftValveId, close rightValveId)
-            leftOpenRightOpen <- openValvesOrGoToNext (open leftValveId, open rightValveId)
-            leftCloseRightOpen <- openValvesOrGoToNext (close leftValveId, open rightValveId)
-            leftCloseRightClose <- openValvesOrGoToNext (close leftValveId, close rightValveId)
-
-            return $ maxFlow $ withStrategy (parBuffer 40 rseq) $ leftOpenRightClose <> leftOpenRightOpen <> leftCloseRightOpen <> leftCloseRightClose
-
-        openValvesOrGoToNext :: (OpenCloseValveId, OpenCloseValveId) -> State CachePartB [TotalFlowRateState]
-        openValvesOrGoToNext (eitherLeftValveId, eitherRightValveId) = do
-               if isNotAlreadyOpened eitherLeftValveId && isNotAlreadyOpened eitherRightValveId
-                        then do
-                            let leftValveIdToOpen = lefts [eitherLeftValveId] 
-                            let rightValveIdToOpen = lefts [eitherRightValveId] 
-                            let openingValveIds = Set.fromList $ leftValveIdToOpen <> rightValveIdToOpen
-                            let newOpenedVaves = Set.union openedValves openingValveIds
-                            let currentValveFlows = sum . map getValveFlow $ Set.toList openingValveIds
-                            let nextLeftValveIds =  getNextValves $ rights [eitherLeftValveId]
-                            let nextRightValveIds = getNextValves $ rights [eitherRightValveId]
-                            let newFlowRatePath (nextLeftValveId, nextRightValveId) = (totalFlowRate + lastFlowRate + currentValveFlows, (lastFlowRate + currentValveFlows):flowRates, (nextLeftValveId <> leftPath, nextRightValveId <> rightPath), newOpenedVaves)
-                            let allNextValveIdsPairs = Set.toList $ Set.cartesianProduct (Set.fromList nextLeftValveIds) (Set.fromList nextRightValveIds)
-                            let nextMinutes = minutes - 1
-                            mapM (getMaxFlowRatePath2PersonsWithCache cave allValvesThatCanBeOpened nextMinutes . newFlowRatePath) allNextValveIdsPairs
-                        else return []
-
-        isNotAlreadyOpened :: OpenCloseValveId -> Bool
-        isNotAlreadyOpened = either (`Set.notMember` openedValves) (const True)
-
-        isInCache :: State CachePartB Bool
-        isInCache = do
-            cache <- get
-            return $ (currentValveIdsSet, minutes, openedValves, totalFlowRate) `Map.member` cache
-
-        getFromCache :: State CachePartB TotalFlowRateState
-        getFromCache = do
-            cache <- get
-            return $ cache Map.! (currentValveIdsSet, minutes, openedValves, totalFlowRate)
-
-        leftValveId = head leftPath
-        leftValveFlow = getValveFlow leftValveId
-
-        open = Left
-        close = Right
-
-        rightValveId = head rightPath
-        rightValveFlow = getValveFlow rightValveId
-
-        currentValveIdsSet = Set.fromList [leftValveId, rightValveId]
-
-        lastFlowRate = headDef 0 flowRates
-        
-        getValve = (Map.!) cave 
-        getValveFlow = fst . getValve
-
-
-        getNextValves :: [ValveId] -> [[ValveId]]
-        getNextValves [] = [[]]
-        getNextValves valveIds = map (:[]) $ concatMap (snd . getValve) valveIds
-
-        maxFlow :: [TotalFlowRateState] -> TotalFlowRateState
-        maxFlow = maximumBy (compare `on` sel1)
-
-partB :: Cave -> TotalFlowRateState
-partB cave = sel1 $ getMaxFlowRatePath2Persons cave 26 ["AA"]
+maxFlow = maximumBy (compare `on` sel1)

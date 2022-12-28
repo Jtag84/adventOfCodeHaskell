@@ -52,7 +52,7 @@ runDay inputParser partA partB verbosity inputFile = do
       time2 <- getCurrentTime
 
       let timeA = realToFrac $ diffUTCTime time2 time1
-      when (verbosity >= Timings && successA) $ putStrLn $ printf "(%.2f)" timeA
+      when (verbosity >= Timings && successA) $ putStrLn $ printf "(%.6fs)" timeA
 
       withColor Blue $ putStrLn "Part B:"
       successB <- catch (print (partB i) $> True) $
@@ -63,7 +63,7 @@ runDay inputParser partA partB verbosity inputFile = do
       time3 <- getCurrentTime
 
       let timeB = realToFrac $ diffUTCTime time3 time2
-      when (verbosity >= Timings && successB) $ putStrLn $ printf "(%.2f)" timeB
+      when (verbosity >= Timings && successB) $ putStrLn $ printf "(%.6fs)" timeB
 
       return $
         (,)

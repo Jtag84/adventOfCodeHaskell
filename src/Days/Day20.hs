@@ -21,6 +21,7 @@ import Data.STRef (STRef, newSTRef, writeSTRef, readSTRef)
 import Data.Functor.Identity (Identity (Identity, runIdentity))
 import GHC.ST (ST(ST))
 import Control.Monad ( zipWithM_, join, forM_ )
+import Util.LinkedList
 
 runDay :: R.Day
 runDay = R.runDay encryptedFileParser partA partB
@@ -42,17 +43,6 @@ type Value = Int
 
 type EncryptedFile = [Value]
 type MixedFile = [Value]
-
-type PreviousNode = LinkedListNode
-type NextNode = LinkedListNode
-
-data LinkedListNode value wrapper where
-    LLNode :: value -> (wrapper (PreviousNode value wrapper)) -> (wrapper (NextNode value wrapper)) -> LinkedListNode value wrapper
-    Empty :: LinkedListNode value wrapper
-        
-
-type MutableLinkedList a s = LinkedListNode a (STRef s)
-
 
 findFirstNextNodeWithValue :: Eq value => value -> Int -> MutableLinkedList value s -> ST s (Maybe (MutableLinkedList value s))
 findFirstNextNodeWithValue _ _ Empty = return Nothing

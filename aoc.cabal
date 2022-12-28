@@ -52,6 +52,7 @@ library
       Program.Color
       Program.RunDay
       Util.Coordinate
+      Util.LinkedList
       Util.Pair
       Util.Parsers
       Util.Range

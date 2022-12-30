@@ -1,5 +1,7 @@
 module Util.Coordinate where
-
+import Data.Vector qualified as Vec
+import Data.Vector(Vector)
+ 
 type LineCoordinate = (Coordinate,Coordinate)
 
 data Coordinate where
@@ -30,3 +32,26 @@ getMaxX = maximum . concatMap (\(left, right) -> [getX left, getX right])
 
 getMaxY :: [LineCoordinate] -> Int
 getMaxY = maximum . concatMap (\(left, right) -> [getY left, getY right])
+
+-- >>> modifyY (+4) (XY (1,3))
+-- XY (1,7)
+modifyY :: (Int -> Int) -> Coordinate -> Coordinate
+modifyY yModifier coordinate = XY (getX coordinate, (yModifier . getY) coordinate)
+
+-- >>> modifyX (+4) (XY (1,3))
+-- XY (5,3)
+modifyX :: (Int -> Int) -> Coordinate -> Coordinate
+modifyX xModifier coordinate = XY ((xModifier . getX) coordinate, getY coordinate)
+
+minX :: Vector Coordinate -> Int
+minX = minimum . Vec.map getX
+
+maxX :: Vector Coordinate -> Int
+maxX = maximum . Vec.map getX
+
+minY :: Vector Coordinate -> Int
+minY = minimum . Vec.map getY
+
+maxY :: Vector Coordinate -> Int
+maxY = maximum . Vec.map getY
+

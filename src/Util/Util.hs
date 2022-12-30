@@ -73,3 +73,21 @@ mapBoundingBox m =
     (maximum . fmap fst . Map.keys $ m)
     (minimum . fmap snd . Map.keys $ m)
     (maximum . fmap snd . Map.keys $ m)
+
+-- >>> takeUntilFirstNRepeats 3 [1,2,3,4,5,6,7,8,9,0,1,2,4,5,1,2,3,4,5,6,7,8,9]
+-- [1,2,3,4,5,6,7,8,9,0,1,2,4,5]
+takeUntilFirstNRepeats :: Eq a => Int -> [a] -> [a]
+takeUntilFirstNRepeats n list = do
+    let nRepeat = take n list
+    nRepeat ++ takeUntil nRepeat (drop n list)
+
+-- >>> takeUntil [1,2,3] [0,0,0,1,2,1,2,3,4,5,6]
+-- [0,0,0,1,2]
+-- take until the list is found
+takeUntil :: Eq a => [a] -> [a] -> [a]
+takeUntil listToCompareTo [] = []
+takeUntil listToCompareTo listToSearch@(x:xs)
+  | take (length listToCompareTo) listToSearch == listToCompareTo = []
+  | otherwise = x:takeUntil listToCompareTo xs
+
+

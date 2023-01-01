@@ -54,8 +54,6 @@ intToSnafu number = do
         else
             intToSnafu division <> show remainder
 
------------- TYPES ------------
-
 ------------ PART A ------------
 
 -- Part A:

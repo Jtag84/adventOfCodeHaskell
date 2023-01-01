@@ -17,9 +17,13 @@ getX :: Coordinate -> Int
 getX (XY (x, _))= x
 getX (Matrix (_, column)) = column - 1
 
+
 getY :: Coordinate -> Int
 getY (XY (_, y)) = y
 getY (Matrix (row, _)) = row - 1
+
+getRow = (+1) . getY
+getCol = (+1) . getX
 
 getRowCoordinate :: Coordinate -> Int
 getRowCoordinate = (+) 1 . getY
@@ -35,13 +39,27 @@ getMaxY = maximum . concatMap (\(left, right) -> [getY left, getY right])
 
 -- >>> modifyY (+4) (XY (1,3))
 -- XY (1,7)
+-- >>> modifyY (+4) (Matrix (1,3))
+-- Matrix (1,7)
 modifyY :: (Int -> Int) -> Coordinate -> Coordinate
-modifyY yModifier coordinate = XY (getX coordinate, (yModifier . getY) coordinate)
+modifyY yModifier coordinate@(XY _) = XY (getX coordinate, (yModifier . getY) coordinate)
+modifyY yModifier coordinate@(Matrix _) = Matrix (getRow coordinate, (yModifier . getCol) coordinate)
 
 -- >>> modifyX (+4) (XY (1,3))
 -- XY (5,3)
 modifyX :: (Int -> Int) -> Coordinate -> Coordinate
-modifyX xModifier coordinate = XY ((xModifier . getX) coordinate, getY coordinate)
+modifyX xModifier coordinate@(XY _) = XY ((xModifier . getX) coordinate, getY coordinate)
+modifyX xModifier coordinate@(Matrix _) = Matrix ((xModifier . getRow) coordinate, getCol coordinate)
+
+-- >>> modifyRow (+4) (Matrix (1,3))
+-- Matrix (5,3)
+modifyRow :: (Int -> Int) -> Coordinate -> Coordinate
+modifyRow = modifyX
+
+-- >>> modifyCol (+4) (Matrix (1,3))
+-- Matrix (1,7)
+modifyCol :: (Int -> Int) -> Coordinate -> Coordinate
+modifyCol = modifyY
 
 minX :: Vector Coordinate -> Int
 minX = minimum . Vec.map getX

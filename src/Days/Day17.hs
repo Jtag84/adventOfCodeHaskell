@@ -78,10 +78,6 @@ moveDirection :: Direction -> Rock -> Rock
 moveDirection LeftD = moveLeft
 moveDirection RightD = moveRight
 
-data Direction = 
-    LeftD | RightD
-    deriving(Show,Eq)
-
 ------------ PART A ------------
 fallingRock :: [Rock] -> [Direction] -> ([Rock], Set Coordinate, [Int]) -> ([Rock], Set Coordinate, [Int])
 fallingRock (currentRock:nextRock:nextRocks) (currentDirection:nextDirections) fallenRocks@(stack, stackCoordinates, stackHeights)

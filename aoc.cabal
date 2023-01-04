@@ -51,6 +51,7 @@ library
       Days.Day25
       Program.Color
       Program.RunDay
+      Util.Cache
       Util.Coordinate
       Util.LinkedList
       Util.Pair
@@ -83,6 +84,7 @@ library
     , parser-combinators
     , safe
     , scientific
+    , search-algorithms
     , text
     , time
     , tuple
@@ -119,6 +121,7 @@ executable aoc-exe
     , parser-combinators
     , safe
     , scientific
+    , search-algorithms
     , text
     , time
     , tuple

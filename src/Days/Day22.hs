@@ -60,22 +60,6 @@ boardInstructionsParser :: Parser (Board, [Instruction])
 boardInstructionsParser = (,) <$> boardParser <*> instructionsParser
 
 ------------ TYPES ------------
-data Direction = 
-      RightD 
-    | DownD
-    | LeftD 
-    | UpD 
-    deriving(Eq, Show, Enum)
-
-data Rotation = Clockwise | CounterClockwise
-    deriving(Eq, Show)
-
-rotate :: Rotation -> Direction -> Direction
-rotate Clockwise UpD = RightD
-rotate Clockwise direction = succ direction
-rotate CounterClockwise RightD = UpD
-rotate CounterClockwise direction = pred direction
-
 rotatePlayer :: Rotation -> PlayerPosition -> PlayerPosition
 rotatePlayer rotation (direction, position) = (rotate rotation direction, position)
 

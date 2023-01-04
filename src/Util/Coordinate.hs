@@ -9,6 +9,22 @@ data Coordinate where
   Matrix :: (Int, Int) -> Coordinate
   deriving(Show, Eq, Ord)
 
+data Direction = 
+      RightD 
+    | DownD
+    | LeftD 
+    | UpD 
+    deriving(Eq, Show, Enum, Ord)
+
+data Rotation = Clockwise | CounterClockwise
+    deriving(Eq, Show)
+
+rotate :: Rotation -> Direction -> Direction
+rotate Clockwise UpD = RightD
+rotate Clockwise direction = succ direction
+rotate CounterClockwise RightD = UpD
+rotate CounterClockwise direction = pred direction
+
 toMatrixCoordinate :: Coordinate -> (Int, Int)
 toMatrixCoordinate (XY (x, y)) = (y + 1, x + 1)
 toMatrixCoordinate (Matrix rowColumn) = rowColumn
@@ -73,3 +89,14 @@ minY = minimum . Vec.map getY
 maxY :: Vector Coordinate -> Int
 maxY = maximum . Vec.map getY
 
+getNorth (XY (x,y)) = XY (x,y - 1)
+getNorthEast (XY (x,y)) = XY (x + 1,y - 1)
+getNorthWest (XY (x,y)) = XY (x - 1,y - 1)
+getSouth (XY (x,y)) = XY (x,y + 1)
+getSouthEast (XY (x,y)) = XY (x + 1,y + 1)
+getSouthWest (XY (x,y)) = XY (x - 1,y + 1)
+getWest (XY (x,y)) = XY (x - 1,y)
+getEast (XY (x,y)) = XY (x + 1,y)
+
+manhattanDistance :: Coordinate -> Coordinate -> Int
+manhattanDistance from to = abs (getX from - getX to) + abs (getY from - getY to)

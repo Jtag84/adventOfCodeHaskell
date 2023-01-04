@@ -42,14 +42,6 @@ elfParser = do
 type Elf = Coordinate
 
 ------------ PART A ------------
-getNorth (XY (x,y)) = XY (x,y - 1)
-getNorthEast (XY (x,y)) = XY (x + 1,y - 1)
-getNorthWest (XY (x,y)) = XY (x - 1,y - 1)
-getSouth (XY (x,y)) = XY (x,y + 1)
-getSouthEast (XY (x,y)) = XY (x + 1,y + 1)
-getSouthWest (XY (x,y)) = XY (x - 1,y + 1)
-getWest (XY (x,y)) = XY (x - 1,y)
-getEast (XY (x,y)) = XY (x + 1,y)
 
 -- >>> getNorthBound (XY (1,1))
 -- [XY (0,0),XY (1,0),XY (2,0)]

@@ -43,6 +43,7 @@ extra-deps:
   - name: intset
     git: https://github.com/bgamari/intset.git
     commit: 019578d5549610f7d01b11ba89c1326164b13952
+  - groupBy-0.1.0.0
   # - intset-0.1.1.0 #@sha256:24a47ad30f240ec84e3f4de8481c9950c280990258f90cf171aa2e89fcf93ec6,2912
   # - bits-extras-0.1.3 #@sha256:ed3bc33bdb8f544f23baea198afda34b32da608531e20efafe494cd4b315ff79,3496
 

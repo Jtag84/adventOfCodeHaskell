@@ -1,6 +1,7 @@
 module Days.Day18 where
 
 import Data.List
+    ( drop, (\\), group, sort, sortBy, sortOn)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
@@ -18,6 +19,7 @@ import Data.Scientific (toBoundedInteger)
 import Options.Applicative ((<|>), Alternative (empty))
 import Data.Tuple.Select (Sel3(sel3), Sel1 (sel1), Sel2 (sel2))
 import Data.Function (on)
+import Data.List.GroupBy(groupBy)
 
 runDay :: R.Day
 runDay = R.runDay cubeCoordinatesParser partA partB
@@ -44,6 +46,10 @@ type CubeCoordinate = (X,Y,Z)
 type CubeCoordinates = [CubeCoordinate]
 
 ------------ PART A ------------
+
+-- Part A:
+-- 4332
+-- (0.008813s)
 partA :: CubeCoordinates -> Int
 partA = calculateUnconnectedSurfaces
 
@@ -111,23 +117,93 @@ getSameYZgroup = groupBy (\(_,y1,z1) (_,y2,z2) -> (z1 == z2) && (y1 == y2)) . so
 ------------ PART B ------------
 -- >>> partB [(2,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5)]
 -- 58
+
+-- Part B:
+-- 2524
+-- (11.474669s)
 partB :: CubeCoordinates -> Int
 partB cubeCoordinates = do
-    let allUnconnectedCubeSurfaces = calculateUnconnectedSurfaces cubeCoordinates 
-    let allAirPocketSurfaces = (6 *) . length $ findBlockedAirPocket cubeCoordinates
-    let allUnconnectedAirPoacketSurfaces = calculateUnconnectedSurfaces $ findBlockedAirPocket cubeCoordinates
-    allUnconnectedCubeSurfaces - allUnconnectedAirPoacketSurfaces
--- >>> findBlockedAirPocket [(2,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5)]
--- [(2,2,5)]
-findBlockedAirPocket :: CubeCoordinates -> CubeCoordinates
-findBlockedAirPocket = map (!! 0) . filter ((6 ==) . length) . group . sort . getAllSurroundingPocketAirCubes
+    let blockedAirPocketCubes = getAllSurroundingPocketAirCubes cubeCoordinates
+    calculateUnconnectedSurfaces . Set.toList $ Set.fromList cubeCoordinates `Set.union` blockedAirPocketCubes
 
--- >>> getAllSurroundingPocketAirCubes . getAllSurroundingPocketAirCubes $ [(2,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5)]
--- [(-1,2,2),(1,2,2),(0,1,2),(0,3,2),(0,2,1),(0,2,3),(0,1,2),(2,1,2),(1,0,2),(1,2,2),(1,1,1),(1,1,3),(0,3,2),(2,3,2),(1,2,2),(1,4,2),(1,3,1),(1,3,3),(0,2,1),(2,2,1),(1,1,1),(1,3,1),(1,2,0),(1,2,2),(0,2,3),(1,1,3),(1,3,3),(1,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(3,2,2),(5,2,2),(4,1,2),(4,3,2),(4,2,1),(4,2,3),(2,1,2),(4,1,2),(3,0,2),(3,2,2),(3,1,1),(3,1,3),(2,3,2),(4,3,2),(3,2,2),(3,4,2),(3,3,1),(3,3,3),(2,2,1),(4,2,1),(3,1,1),(3,3,1),(3,2,0),(3,2,2),(2,2,3),(4,2,3),(3,1,3),(3,3,3),(3,2,2),(0,1,2),(2,1,2),(1,0,2),(1,2,2),(1,1,1),(1,1,3),(2,1,2),(4,1,2),(3,0,2),(3,2,2),(3,1,1),(3,1,3),(1,0,2),(3,0,2),(2,-1,2),(2,1,2),(2,0,1),(2,0,3),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(1,1,1),(3,1,1),(2,0,1),(2,2,1),(2,1,0),(2,1,2),(1,1,3),(3,1,3),(2,0,3),(2,2,3),(2,1,2),(0,3,2),(2,3,2),(1,2,2),(1,4,2),(1,3,1),(1,3,3),(2,3,2),(4,3,2),(3,2,2),(3,4,2),(3,3,1),(3,3,3),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(1,4,2),(3,4,2),(2,3,2),(2,5,2),(2,4,1),(2,4,3),(1,3,1),(3,3,1),(2,2,1),(2,4,1),(2,3,0),(2,3,2),(1,3,3),(3,3,3),(2,2,3),(2,4,3),(2,3,2),(0,2,1),(2,2,1),(1,1,1),(1,3,1),(1,2,0),(1,2,2),(2,2,1),(4,2,1),(3,1,1),(3,3,1),(3,2,0),(3,2,2),(1,1,1),(3,1,1),(2,0,1),(2,2,1),(2,1,0),(2,1,2),(1,3,1),(3,3,1),(2,2,1),(2,4,1),(2,3,0),(2,3,2),(1,2,0),(3,2,0),(2,1,0),(2,3,0),(2,2,-1),(2,2,1),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(0,2,3),(2,2,3),(1,1,3),(1,3,3),(1,2,2),(2,2,3),(4,2,3),(3,1,3),(3,3,3),(3,2,2),(1,1,3),(3,1,3),(2,0,3),(2,2,3),(2,1,2),(1,3,3),(3,3,3),(2,2,3),(2,4,3),(2,3,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(0,2,4),(2,2,4),(1,1,4),(1,3,4),(1,2,5),(2,2,4),(4,2,4),(3,1,4),(3,3,4),(3,2,5),(1,1,4),(3,1,4),(2,0,4),(2,2,4),(2,1,5),(1,3,4),(3,3,4),(2,2,4),(2,4,4),(2,3,5),(2,2,4),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(2,2,4),(2,2,6),(0,2,6),(2,2,6),(1,1,6),(1,3,6),(1,2,5),(1,2,7),(2,2,6),(4,2,6),(3,1,6),(3,3,6),(3,2,5),(3,2,7),(1,1,6),(3,1,6),(2,0,6),(2,2,6),(2,1,5),(2,1,7),(1,3,6),(3,3,6),(2,2,6),(2,4,6),(2,3,5),(2,3,7),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(2,2,4),(2,2,6),(1,2,7),(3,2,7),(2,1,7),(2,3,7),(2,2,6),(2,2,8),(-1,2,5),(1,2,5),(0,1,5),(0,3,5),(0,2,4),(0,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(2,2,4),(2,2,6),(0,1,5),(2,1,5),(1,0,5),(1,2,5),(1,1,4),(1,1,6),(0,3,5),(2,3,5),(1,2,5),(1,4,5),(1,3,4),(1,3,6),(0,2,4),(2,2,4),(1,1,4),(1,3,4),(1,2,3),(1,2,5),(0,2,6),(2,2,6),(1,1,6),(1,3,6),(1,2,5),(1,2,7),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(2,2,4),(2,2,6),(3,2,5),(5,2,5),(4,1,5),(4,3,5),(4,2,4),(4,2,6),(2,1,5),(4,1,5),(3,0,5),(3,2,5),(3,1,4),(3,1,6),(2,3,5),(4,3,5),(3,2,5),(3,4,5),(3,3,4),(3,3,6),(2,2,4),(4,2,4),(3,1,4),(3,3,4),(3,2,3),(3,2,5),(2,2,6),(4,2,6),(3,1,6),(3,3,6),(3,2,5),(3,2,7),(0,1,5),(2,1,5),(1,0,5),(1,2,5),(1,1,4),(1,1,6),(2,1,5),(4,1,5),(3,0,5),(3,2,5),(3,1,4),(3,1,6),(1,0,5),(3,0,5),(2,-1,5),(2,1,5),(2,0,4),(2,0,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(2,2,4),(2,2,6),(1,1,4),(3,1,4),(2,0,4),(2,2,4),(2,1,3),(2,1,5),(1,1,6),(3,1,6),(2,0,6),(2,2,6),(2,1,5),(2,1,7),(0,3,5),(2,3,5),(1,2,5),(1,4,5),(1,3,4),(1,3,6),(2,3,5),(4,3,5),(3,2,5),(3,4,5),(3,3,4),(3,3,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(2,2,4),(2,2,6),(1,4,5),(3,4,5),(2,3,5),(2,5,5),(2,4,4),(2,4,6),(1,3,4),(3,3,4),(2,2,4),(2,4,4),(2,3,3),(2,3,5),(1,3,6),(3,3,6),(2,2,6),(2,4,6),(2,3,5),(2,3,7)]
-getAllSurroundingPocketAirCubes :: CubeCoordinates -> CubeCoordinates
-getAllSurroundingPocketAirCubes cubeCoordinates = concatMap getSurroundingPocketAirCubes cubeCoordinates \\ cubeCoordinates
+-- >>> getAllSurroundingPocketAirCubes2 $ [(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5)]
+-- fromList [(2,2,5)]
+-- >>> getAllSurroundingPocketAirCubes2 $ [(2,2,4),(2,2,7),(1,2,5),(1,2,6),(3,2,5),(3,2,6),(2,1,5),(2,1,6),(2,3,5),(2,3,6)]
+-- fromList [(2,2,5),(2,2,6)]
+-- >>> getAllSurroundingPocketAirCubes2 $ [(2,2,4),(2,2,8),(1,2,5),(1,2,6),(1,2,7),(3,2,5),(3,2,6),(3,2,7),(2,1,5),(2,1,6),(2,1,7),(2,3,5),(2,3,6),(2,3,7)]
+-- fromList [(2,2,5),(2,2,6),(2,2,7)]
+-- >>> getAllSurroundingPocketAirCubes2 $ [(2,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5)]
+-- fromList [(2,2,5)]
+getAllSurroundingPocketAirCubes cubeCoordinates = do
+    findAirPocketClusters getInitialAirCubes
+    where
+        findAirPocketClusters currentAirCubes = do
+            let airPocketClusters = getClustersWithinLimits currentAirCubes
+            let allAirCubesFromPockets = Set.unions airPocketClusters
+            let nextSurroundingAirCubes = Set.unions . Set.map getSurroundingPocketAirCubes $ allAirCubesFromPockets
+            let nextAirPocketClusters = getClustersWithinLimits . Set.toList $ nextSurroundingAirCubes Set.\\ cubeCoordinateSet `Set.union` allAirCubesFromPockets
+            if nextAirPocketClusters == airPocketClusters
+                then
+                    allAirCubesFromPockets
+                else
+                    findAirPocketClusters . Set.toList . Set.unions $ nextAirPocketClusters 
 
--- >>> getSurroundingPocketAirCubes (1,2,2)
--- [(0,2,2),(2,2,2),(1,1,2),(1,3,2),(1,2,1),(1,2,3)]
-getSurroundingPocketAirCubes :: CubeCoordinate -> CubeCoordinates
-getSurroundingPocketAirCubes (x,y,z) = [(x-1,y,z), (x+1,y,z), (x,y-1,z), (x,y+1,z), (x,y,z-1), (x,y,z+1)]
+        getClustersWithinLimits = filter (all withinCubeCoordinates) . getClusters
+        cubeCoordinateSet = Set.fromList cubeCoordinates
+        getInitialAirCubes = Set.toList  $ (Set.unions . Set.map getSurroundingPocketAirCubes) cubeCoordinateSet Set.\\ cubeCoordinateSet
+        withinCubeCoordinates (x, y, z) = x <= maxX && x >= minX && y <= maxY && y >= minY && z <= maxZ && z >= minZ 
+        minX = minimum $ map sel1 cubeCoordinates
+        maxX = maximum $ map sel1 cubeCoordinates
+        minY = minimum $ map sel2 cubeCoordinates
+        maxY = maximum $ map sel2 cubeCoordinates
+        minZ = minimum $ map sel3 cubeCoordinates
+        maxZ = maximum $ map sel3 cubeCoordinates
+
+-- >>> getSurroundingPocketAirCubes (1,2,4)
+-- fromList [(0,2,4),(1,1,4),(1,2,3),(1,2,5),(1,3,4),(2,2,4)]
+getSurroundingPocketAirCubes :: CubeCoordinate -> Set CubeCoordinate
+getSurroundingPocketAirCubes (x,y,z) = Set.fromList [(x-1,y,z), (x+1,y,z), (x,y-1,z), (x,y+1,z), (x,y,z-1), (x,y,z+1)]
+
+sortByX :: CubeCoordinates -> CubeCoordinates
+sortByX  = sortBy (compare `on` sel1)
+
+sortByY :: CubeCoordinates -> CubeCoordinates
+sortByY  = sortBy (compare `on` sel2)
+
+sortByZ :: CubeCoordinates -> CubeCoordinates
+sortByZ  = sortBy (compare `on` sel3)
+
+-- >>> groupByConnectedOnX [(2,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(4,2,2)]
+-- [fromList [(2,1,2)],fromList [(2,1,5)],fromList [(2,2,1)],fromList [(1,2,2),(2,2,2),(3,2,2),(4,2,2)],fromList [(2,2,3)],fromList [(2,2,4)],fromList [(1,2,5)],fromList [(3,2,5)],fromList [(2,2,6)],fromList [(2,3,2)],fromList [(2,3,5)]]
+groupByConnectedOnX :: CubeCoordinates -> [Set CubeCoordinate]
+groupByConnectedOnX = concatMap (map Set.fromList . groupBy (\(x1,_,_) (x2,_,_) -> abs (x1 - x2) == 1) . sortByX) . getSameYZgroup
+
+-- >>> groupByConnectedOnY [(2,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(4,2,2)]
+-- [fromList [(1,2,2)],fromList [(1,2,5)],fromList [(2,2,1)],fromList [(2,1,2),(2,2,2),(2,3,2)],fromList [(2,2,3)],fromList [(2,2,4)],fromList [(2,1,5)],fromList [(2,3,5)],fromList [(2,2,6)],fromList [(3,2,2)],fromList [(3,2,5)],fromList [(4,2,2)]]
+groupByConnectedOnY :: CubeCoordinates -> [Set CubeCoordinate]
+groupByConnectedOnY = concatMap (map Set.fromList . groupBy (\(_,y1,_) (_,y2,_) -> abs (y1 - y2) == 1) . sortByY) . getSameXZgroup
+
+-- >>> groupByConnectedOnZ [(2,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(4,2,2)]
+-- [fromList [(1,2,2)],fromList [(1,2,5)],fromList [(2,1,2)],fromList [(2,1,5)],fromList [(2,2,1),(2,2,2),(2,2,3),(2,2,4)],fromList [(2,2,6)],fromList [(2,3,2)],fromList [(2,3,5)],fromList [(3,2,2)],fromList [(3,2,5)],fromList [(4,2,2)]]
+groupByConnectedOnZ :: CubeCoordinates -> [Set CubeCoordinate]
+groupByConnectedOnZ = concatMap (map Set.fromList . groupBy (\(_,_,z1) (_,_,z2) -> abs (z1 - z2) == 1) . sortByZ) . getSameXYgroup
+
+-- >>> getClusters [(2,2,2),(1,2,2),(3,2,2),(2,1,2),(2,3,2),(2,2,1),(2,2,3),(2,2,4),(2,2,6),(1,2,5),(3,2,5),(2,1,5),(2,3,5),(4,2,2)]
+-- [fromList [(1,2,2),(2,1,2),(2,2,1),(2,2,2),(2,2,3),(2,2,4),(2,3,2),(3,2,2),(4,2,2)],fromList [(1,2,5)],fromList [(2,3,5)],fromList [(2,2,6)],fromList [(2,1,5)],fromList [(3,2,5)]]
+getClusters :: CubeCoordinates -> [Set CubeCoordinate]
+getClusters cubeCoordinates = do
+    let connectedOnX = groupByConnectedOnX cubeCoordinates
+    let connectedOnY = groupByConnectedOnY cubeCoordinates
+    let connectedOnZ = groupByConnectedOnZ cubeCoordinates
+    mergeAllConnectedOnAxis (mergeAllConnectedOnAxis connectedOnX connectedOnY) connectedOnZ
+    where
+        mergeAllConnectedOnAxis [] rightSets = rightSets
+        mergeAllConnectedOnAxis (leftSet:leftSets) rightSets = mergeAllConnectedOnAxis leftSets (mergeConnectedOnAxis leftSet rightSets)
+        mergeConnectedOnAxis :: Set CubeCoordinate -> [Set CubeCoordinate] -> [Set CubeCoordinate]
+        mergeConnectedOnAxis leftSet [] = [leftSet]
+        mergeConnectedOnAxis leftSet (rightSet:rightSets) = do
+            if any (`Set.member` rightSet) leftSet
+                then 
+                    mergeConnectedOnAxis (Set.union leftSet rightSet) rightSets
+                else
+                    mergeConnectedOnAxis leftSet rightSets <> [rightSet]

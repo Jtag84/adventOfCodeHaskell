@@ -76,6 +76,7 @@ library
     , base >=4.7 && <5
     , containers
     , directory
+    , groupBy
     , intset
     , matrix
     , mtl
@@ -113,6 +114,7 @@ executable aoc-exe
     , base >=4.7 && <5
     , containers
     , directory
+    , groupBy
     , intset
     , matrix
     , mtl

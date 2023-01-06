@@ -1,4 +1,4 @@
-module Days.Day13 (runDay) where
+module Year2022.Day13 (runDay) where
 
 import Data.Attoparsec.Text (Parser, char, endOfLine, many', scientific, sepBy')
 import Data.List (elemIndex, sort)

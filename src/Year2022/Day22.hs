@@ -1,4 +1,4 @@
-module Days.Day22 where
+module Year2022.Day22 where
 
 import Data.List
 import Data.Map.Strict (Map)

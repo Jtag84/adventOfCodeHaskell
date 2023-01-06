@@ -1,4 +1,4 @@
-module Days.Day16 where
+module Year2022.Day16 where
 
 import Data.List ( take, maximumBy, minimumBy, subsequences )
 import Data.Map.Strict (Map)

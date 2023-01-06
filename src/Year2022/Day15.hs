@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Days.Day15 where
+module Year2022.Day15 where
 
 import Data.Attoparsec.Text
 import Data.List

@@ -1,4 +1,4 @@
-module Days.Day14 where
+module Year2022.Day14 where
 
 import Data.Attoparsec.Text
   ( Parser,

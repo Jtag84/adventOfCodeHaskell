@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use list comprehension" #-}
-module Days.Day19 where
+module Year2022.Day19 where
 
 {- ORMOLU_DISABLE -}
 import Data.List

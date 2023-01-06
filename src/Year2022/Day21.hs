@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use <$>" #-}
-module Days.Day21 (runDay) where
+module Year2022.Day21 (runDay) where
 
 import Data.List
 import Data.Map.Strict (Map)

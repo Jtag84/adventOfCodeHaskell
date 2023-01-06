@@ -1,4 +1,4 @@
-module Days.Day18 where
+module Year2022.Day18 where
 
 import Data.List
     ( drop, (\\), group, sort, sortBy, sortOn)

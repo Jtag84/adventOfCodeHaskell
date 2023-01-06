@@ -24,31 +24,6 @@ source-repository head
 
 library
   exposed-modules:
-      Days.Day01
-      Days.Day02
-      Days.Day03
-      Days.Day04
-      Days.Day05
-      Days.Day06
-      Days.Day07
-      Days.Day08
-      Days.Day09
-      Days.Day10
-      Days.Day11
-      Days.Day12
-      Days.Day13
-      Days.Day14
-      Days.Day15
-      Days.Day16
-      Days.Day17
-      Days.Day18
-      Days.Day19
-      Days.Day20
-      Days.Day21
-      Days.Day22
-      Days.Day23
-      Days.Day24
-      Days.Day25
       Program.Color
       Program.RunDay
       Util.Cache
@@ -58,6 +33,24 @@ library
       Util.Parsers
       Util.Range
       Util.Util
+      Year2015.Day01
+      Year2015.Day02
+      Year2015.Day03
+      Year2022.Day01
+      Year2022.Day13
+      Year2022.Day14
+      Year2022.Day15
+      Year2022.Day16
+      Year2022.Day17
+      Year2022.Day18
+      Year2022.Day19
+      Year2022.Day20
+      Year2022.Day21
+      Year2022.Day22
+      Year2022.Day23
+      Year2022.Day24
+      Year2022.Day25
+      Years
   other-modules:
       Paths_aoc
   hs-source-dirs:

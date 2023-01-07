@@ -5,6 +5,7 @@ import Program.RunDay (Day)
 import Year2015.Day01 qualified (runDay)
 import Year2015.Day02 qualified (runDay)
 import Year2015.Day03 qualified (runDay)
+import Year2015.Day04 qualified (runDay)
 import Year2022.Day01 qualified (runDay)
 import Year2022.Day13 qualified (runDay)
 import Year2022.Day14 qualified (runDay)
@@ -34,9 +35,10 @@ yearDaysMap =
 year2015 :: Map DayNumber Day
 year2015 =
   fromList
-    [  (1, Year2015.Day01.runDay)
-     , (2, Year2015.Day02.runDay)
-     , (3, Year2015.Day03.runDay)
+    [ (1, Year2015.Day01.runDay),
+      (2, Year2015.Day02.runDay),
+      (3, Year2015.Day03.runDay),
+      (4, Year2015.Day04.runDay)
     ]
 
 year2022 :: Map DayNumber Day

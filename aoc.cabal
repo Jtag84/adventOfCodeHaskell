@@ -36,6 +36,7 @@ library
       Year2015.Day01
       Year2015.Day02
       Year2015.Day03
+      Year2015.Day04
       Year2022.Day01
       Year2022.Day13
       Year2022.Day14
@@ -67,7 +68,9 @@ library
       ansi-terminal
     , attoparsec
     , base >=4.7 && <5
+    , bytestring
     , containers
+    , cryptohash-md5
     , directory
     , groupBy
     , intset
@@ -105,7 +108,9 @@ executable aoc-exe
     , aoc
     , attoparsec
     , base >=4.7 && <5
+    , bytestring
     , containers
+    , cryptohash-md5
     , directory
     , groupBy
     , intset

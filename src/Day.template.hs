@@ -1,58 +1,49 @@
-module Year2015.Day03 (runDay) where
+module YearXXXX.DayXX (runDay) where
 
-import Data.Attoparsec.Text as P (Parser, char, choice, endOfInput, endOfLine, many', many1', parseOnly, scientific, takeText)
-import Data.Functor (($>))
-import Data.List as L (sort, group, nub)
-import Data.Maybe (fromJust, fromMaybe)
+import Algorithm.Search
+import Control.Applicative.Combinators
+import Control.Monad (forM_, join, zipWithM_)
+import Control.Monad.ST (runST)
+import Control.Monad.State (State, evalState, runState)
+import Data.Attoparsec.Text (Parser, char, choice, endOfInput, endOfLine, many', many1', parseOnly, scientific, takeText)
+import Data.Foldable
+import Data.Function (on)
+import Data.Functor
+import Data.List hiding (groupBy)
+import Data.List.GroupBy (groupBy)
+import Data.Map.Strict qualified as Map
+import Data.Matrix qualified as M
+import Data.Maybe
+import Data.STRef (STRef, newSTRef, readSTRef, writeSTRef)
 import Data.Scientific (Scientific, toBoundedInteger)
+import Data.Sequence (mapWithIndex)
+import Data.Set qualified as Set
 import Data.Text (Text)
+import Data.Vector qualified as Vec
 import Options.Applicative (Alternative (empty), value, (<|>))
 import Program.RunDay qualified as R (Day, runDay)
-import Util.Coordinate (getEast, getNorth, getSouth, getWest, Coordinate (XY))
-import Data.Foldable
-import Data.Sequence (mapWithIndex)
+import Util.Cache (Cache, caching)
+import Util.Coordinate
+import Util.LinkedList
+import Util.Range
+import Util.Util qualified as U
 
 runDay :: R.Day
-runDay = R.runDay directionsParser partA partB
+runDay = R.runDay inputParser partA partB
 
 ------------ TYPES ------------
-data Direction = North | East | South | West
-  deriving (Show, Eq)
+
 ------------ PARSER ------------
 
-directionParser :: Parser Direction
-directionParser = choice [
-      char '>' $> East,
-      char '^' $> North,
-      char '<' $> West,
-      char 'v' $> South
-    ]
-
-directionsParser :: Parser [Direction]
-directionsParser = many1' directionParser <* (endOfLine <|> endOfInput)
+inputParser :: Parser Text
+inputParser = takeText
 
 ------------ PART A ------------
--- Part A:
--- 2572
--- (0.004029s)
-partA = getNumberOfUniqueCoordinates . getCoordinates
 
-getNumberOfUniqueCoordinates = length . group . sort
-
-getCoordinates = foldl' (\coordinates direction -> getCoordinate (head coordinates) direction : coordinates) [XY (0,0)] 
-
-getCoordinate coordinate East = getEast coordinate
-getCoordinate coordinate North = getNorth coordinate
-getCoordinate coordinate South = getSouth coordinate
-getCoordinate coordinate West = getWest coordinate
+partA :: Text -> Text
+partA = error "Part A not done yet"
 
 ------------ PART B ------------
--- Part B:
--- 2631
--- (0.004214s)
-partB directions = do
-  let directionsWithIndex = zip [1..] directions
-  let santaDirections = map snd . filter (odd . fst) $ directionsWithIndex
-  let robotSantaDirections = map snd . filter (even . fst) $ directionsWithIndex
-  getNumberOfUniqueCoordinates $ getCoordinates santaDirections <> getCoordinates robotSantaDirections
 
+partB :: Text -> Text
+partB = error "Part B not done yet"

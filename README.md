@@ -8,14 +8,19 @@ To use:
 - Change the package name, update the GitHub link, etc. You'll also want to remove the .cabal file and let stack generate a new one.
 - Fill in the solutions and have fun!
 
-When running from the command line you can pass the option `-d/--day DAY` to run a specific day's solutions. If you do this, then you can also pass `-i/--input FILE` to specify an input file; by default, the program will look for it in `input/DayXX.txt`. You can also pass the argument `--all-days` and all days will be run in order, assuming the input files are in their default places.
+There is a bash script `addDayFromTemplate.sh` where you can pass the year and the day to automatically create the haskell file from the template `Day.template.hs`, update the `Years.hs`, create the input files (including an empty example one), and download the puzzle input for you (note that for this part to work you need the session cookie to be saved in `cookieSession.txt`).
+Example usage:
+- `./addDayFromTemplate.sh 2022 1` : Creates `./src/Year2022/Day01.hs`, `./input/2022/Day01.txt`, and `./input/2022/Day01Example.txt`. Downloads the puzzle input, and updates `./src/Years.hs` with the new module for day 1 2022 to be able to run.
+
+When running from the command line you can pass the option `-y/--year YEAR -d/--day DAY` to run a specific day's solutions. If you do this, then you can also pass `-i/--input FILE` to specify an input file; by default, the program will look for it in `input/YEAR/DayXX.txt`, if you pass `-e/--example` it will look for `input/YEAR/DayXXExample.txt`. You can also pass the argument `--all-days` and all days will be run in order, assuming the input files are in their default places.
 
 Additionally, you can specify the level of detail to print out. By default, the program will print only the answers. If you'd like it to print timing information, use the `-t/--timings` option. Alternatively, if you'd like it to print the output of the parser and error messages in full, use the `-v/--verbose` option.
 
 Example usage:
-- `stack run -- -d 9`: Runs Day 9's solutions.
-- `stack run -- --day 14 --input "wibble.txt"`: Runs Day 14's solutions, using the input file "wibble.txt".
-- `stack run -- -d 1 -i "alex.txt" --timings`: Runs Day 1's solutions, using the input file "alex.txt". Also prints timing information for each solution.
+- `stack run -- -y 2022 -d 9`: Runs Day 9's solutions.
+- `stack run -- -y 2022 -d 9 -e`: Runs Day 9's solutions using the example input.
+- `stack run -- -y 2022 --day 14 --input "wibble.txt"`: Runs Day 14's solutions, using the input file "wibble.txt".
+- `stack run -- -y 2022 -d 1 -i "alex.txt" --timings`: Runs Day 1's solutions, using the input file "alex.txt". Also prints timing information for each solution.
 - `stack run -- --all-days`: Runs the solutions from all days.
 
 This template can be used with `ghcid` to compile and run your code every time you save your files. Consider putting the following in your `.bashrc` (or equivalent):

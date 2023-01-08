@@ -24,3 +24,22 @@ caching key getValue = do
         getFromCache = do
             cache <- get
             return $ cache Map.! key
+
+cachingState :: Ord key => key -> (key -> State (Cache key value) value) -> State (Cache key value) value
+cachingState key getValue = do
+        inCache <- isInCache
+        if inCache 
+        then 
+            getFromCache
+        else do
+            value <- getValue key 
+            modify (Map.insert key value)
+            return value
+    where
+        isInCache = do
+            cache <- get
+            return $ key `Map.member` cache
+
+        getFromCache = do
+            cache <- get
+            return $ cache Map.! key

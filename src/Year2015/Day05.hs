@@ -92,19 +92,10 @@ hasOneLetterInBetween (a:b:c:xs)
     | otherwise = hasOneLetterInBetween (b:c:xs)
 hasOneLetterInBetween _ = False
 
--- >>> aPairAppearsTwice "asddefg"
--- False
--- >>> aPairAppearsTwice "wasddasefg"
--- True
-aPairAppearsTwice (a:b:xs) =
-        (not . T.null . snd $ T.pack [a,b] `T.breakOn` T.pack xs)
-            || aPairAppearsTwice (b:xs)
-aPairAppearsTwice _ = False
-
 -- Part B:
 -- 53
 -- (0.000849s)
 partB = 
     length 
-    . filter aPairAppearsTwice 
+    . filter U.aPairAppearsTwice 
     . filter hasOneLetterInBetween

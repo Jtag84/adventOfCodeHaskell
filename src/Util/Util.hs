@@ -1,10 +1,9 @@
 module Util.Util where
 
-{- ORMOLU_DISABLE -}
 import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
+import Data.Map.Strict qualified as Map
+import Data.Text qualified as T
 import Debug.Trace (trace)
-{- ORMOLU_ENABLE -}
 
 {-
 This module contains a series of miscellaneous utility functions that I have found helpful in the past.
@@ -45,10 +44,10 @@ chunksByPredicate :: (a -> Bool) -> [a] -> [[a]]
 chunksByPredicate p ls
   | null ls = []
   | otherwise =
-    let (prefix, rest) = span p ls
-     in if null prefix
-          then (chunksByPredicate p $ dropWhile (not . p) rest)
-          else prefix : (chunksByPredicate p $ dropWhile (not . p) rest)
+      let (prefix, rest) = span p ls
+       in if null prefix
+            then (chunksByPredicate p $ dropWhile (not . p) rest)
+            else prefix : (chunksByPredicate p $ dropWhile (not . p) rest)
 
 -- Allows the user to log out some context and then the result of some expression
 -- For example, supposing a is 2, and b is 5:
@@ -78,16 +77,36 @@ mapBoundingBox m =
 -- [1,2,3,4,5,6,7,8,9,0,1,2,4,5]
 takeUntilFirstNRepeats :: Eq a => Int -> [a] -> [a]
 takeUntilFirstNRepeats n list = do
-    let nRepeat = take n list
-    nRepeat ++ takeUntil nRepeat (drop n list)
+  let nRepeat = take n list
+  nRepeat ++ takeUntil nRepeat (drop n list)
 
 -- >>> takeUntil [1,2,3] [0,0,0,1,2,1,2,3,4,5,6]
 -- [0,0,0,1,2]
 -- take until the list is found
 takeUntil :: Eq a => [a] -> [a] -> [a]
 takeUntil listToCompareTo [] = []
-takeUntil listToCompareTo listToSearch@(x:xs)
+takeUntil listToCompareTo listToSearch@(x : xs)
   | take (length listToCompareTo) listToSearch == listToCompareTo = []
-  | otherwise = x:takeUntil listToCompareTo xs
+  | otherwise = x : takeUntil listToCompareTo xs
 
+-- >>> aPairAppearsTwice "asddefg"
+-- False
+-- >>> aPairAppearsTwice "wasddasefg"
+-- True
+aPairAppearsTwice (a : b : xs) =
+  (not . T.null . snd $ T.pack [a, b] `T.breakOn` T.pack xs)
+    || aPairAppearsTwice (b : xs)
+aPairAppearsTwice _ = False
 
+a=2
+-- >>> aPairOfTheSameLetterAppearsTwice "aakkaa"
+-- True
+-- >>> aPairOfTheSameLetterAppearsTwice "aakka"
+-- False
+-- >>> aPairOfTheSameLetterAppearsTwice "aakkaddkjhyugbjddpgyuh"
+-- True
+aPairOfTheSameLetterAppearsTwice :: String -> Bool
+aPairOfTheSameLetterAppearsTwice (a:b:xs)
+    | a /= b = aPairOfTheSameLetterAppearsTwice (b:xs)
+    | otherwise = (not . T.null . snd $ T.pack [a, b] `T.breakOn` T.pack xs) || aPairOfTheSameLetterAppearsTwice (b:xs)
+aPairOfTheSameLetterAppearsTwice _ = False

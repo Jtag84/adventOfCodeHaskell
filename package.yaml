@@ -18,6 +18,7 @@ extra-source-files:
 description:         2022 Advent of Code projects in Haskell
 
 dependencies:
+- aeson
 - ansi-terminal
 - attoparsec
 - base >= 4.7 && < 5

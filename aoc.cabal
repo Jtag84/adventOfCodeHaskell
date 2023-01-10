@@ -44,6 +44,10 @@ library
       Year2015.Day09
       Year2015.Day10
       Year2015.Day11
+      Year2015.Day12
+      Year2015.Day13
+      Year2015.Day14
+      Year2015.Day15
       Year2022.Day01
       Year2022.Day13
       Year2022.Day14
@@ -72,7 +76,8 @@ library
       OverloadedStrings
       RecordWildCards
   build-depends:
-      ansi-terminal
+      aeson
+    , ansi-terminal
     , attoparsec
     , base >=4.7 && <5
     , bytestring
@@ -111,7 +116,8 @@ executable aoc-exe
       RecordWildCards
   ghc-options: -fexcess-precision -funfolding-use-threshold=16 -O2 -optc-ffast-math -optc-O3 -rtsopts -threaded -with-rtsopts=-C0 -with-rtsopts=-N4 -with-rtsopts=-qa
   build-depends:
-      ansi-terminal
+      aeson
+    , ansi-terminal
     , aoc
     , attoparsec
     , base >=4.7 && <5

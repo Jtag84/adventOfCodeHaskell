@@ -13,6 +13,10 @@ import Year2015.Day08 qualified (runDay)
 import Year2015.Day09 qualified (runDay)
 import Year2015.Day10 qualified (runDay)
 import Year2015.Day11 qualified (runDay)
+import Year2015.Day12 qualified (runDay)
+import Year2015.Day13 qualified (runDay)
+import Year2015.Day14 qualified (runDay)
+import Year2015.Day15 qualified (runDay)
 import Year2022.Day01 qualified (runDay)
 import Year2022.Day13 qualified (runDay)
 import Year2022.Day14 qualified (runDay)
@@ -52,7 +56,11 @@ year2015 =
       (8, Year2015.Day08.runDay),
       (9, Year2015.Day09.runDay),
       (10, Year2015.Day10.runDay),
-      (11, Year2015.Day11.runDay)
+      (11, Year2015.Day11.runDay),
+      (12, Year2015.Day12.runDay),
+      (13, Year2015.Day13.runDay),
+      (14, Year2015.Day14.runDay),
+      (15, Year2015.Day15.runDay)
     ]
 
 year2022 :: Map DayNumber Day

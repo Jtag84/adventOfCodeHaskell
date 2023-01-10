@@ -5,7 +5,7 @@ import Control.Applicative.Combinators
 import Control.Monad (forM_, join, zipWithM_)
 import Control.Monad.ST (runST)
 import Control.Monad.State (State, evalState, runState)
-import Data.Attoparsec.Text (Parser, char, choice, endOfInput, endOfLine, many', many1', parseOnly, scientific, takeText)
+import Data.Attoparsec.Text as P (Parser, char, choice, endOfInput, endOfLine, many', many1', parseOnly, scientific, takeText, letter, scientific)
 import Data.Foldable
 import Data.Function (on)
 import Data.Functor

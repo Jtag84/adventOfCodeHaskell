@@ -29,6 +29,7 @@ import Util.Coordinate
 import Util.LinkedList
 import Util.Range
 import Util.Util qualified as U
+import Util.Util (getNextChar)
 
 runDay :: R.Day
 runDay = R.runDay inputParser partA partB
@@ -115,13 +116,6 @@ getNextPassword (a:b:c:d:e:f:g:h:[]) = a : b : c : d : e : f : g : getNextChar h
 -- "ghjaabcc"
 getNextValidPassword :: Int -> String -> String
 getNextValidPassword n = (!! (n - 1)) . filter isPasswordValid . iterate getNextPassword
--- >>> getNextChar 'a'
--- 'b'
--- >>> getNextChar 'z'
--- 'a'
-getNextChar :: Char -> Char
-getNextChar 'z' = 'a'
-getNextChar c = toEnum . (+1) . fromEnum $ c
 
 partA :: String -> String
 partA = getNextValidPassword 1

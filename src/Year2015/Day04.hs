@@ -1,4 +1,4 @@
-module Year2015.Day04 (runDay) where
+module Year2015.Day04 where
 
 import Algorithm.Search
 import Control.Applicative.Combinators
@@ -33,6 +33,7 @@ import Data.Text.Encoding (encodeUtf8)
 import Text.Printf (printf)
 import Data.Bits
 import Data.ByteString.Char8 as BC
+import Data.Word (Word8)
 
 runDay :: R.Day
 runDay = R.runDay inputParser partA partB
@@ -50,13 +51,14 @@ inputParser = takeTill isEndOfLine
 -- 346386
 -- (0.095877s)
 partA :: Text -> Int
-partA secret = mine5Zeroes (encodeUtf8 secret) 0
+partA secret = fst $ mine5Zeroes (encodeUtf8 secret) 0
 
-mine5Zeroes :: B.ByteString -> Int -> Int
-mine5Zeroes secret number = 
-    if doesMd5HashStartsWithFiveZeroes . B.unpack . MD5.hash $ secret <> BC.pack (show number)
+mine5Zeroes :: B.ByteString -> Int -> (Int, [Word8])
+mine5Zeroes secret number = do
+    let md5Hash = B.unpack . MD5.hash $ secret <> BC.pack (show number)
+    if doesMd5HashStartsWithFiveZeroes md5Hash
         then
-            number
+            (number, md5Hash)
         else
             mine5Zeroes secret (number + 1)
 -- >>> doesMd5HashStartsWithFiveZeroes [0,0,0x04,1,2]

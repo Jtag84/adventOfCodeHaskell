@@ -2,12 +2,16 @@ module Util.Util where
 
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
+import Data.Set qualified as Set
 import Data.Text qualified as T
 import Debug.Trace (trace)
 
 {-
 This module contains a series of miscellaneous utility functions that I have found helpful in the past.
 -}
+
+-- >>> freq "asdfgaas"
+-- fromList [('a',3),('d',1),('f',1),('g',1),('s',2)]
 
 -- Takes a list.
 -- Returns a map from elements of that list to the number of times they appeared in the list.
@@ -98,7 +102,6 @@ aPairAppearsTwice (a : b : xs) =
     || aPairAppearsTwice (b : xs)
 aPairAppearsTwice _ = False
 
-a=2
 -- >>> aPairOfTheSameLetterAppearsTwice "aakkaa"
 -- True
 -- >>> aPairOfTheSameLetterAppearsTwice "aakka"
@@ -110,3 +113,33 @@ aPairOfTheSameLetterAppearsTwice (a:b:xs)
     | a /= b = aPairOfTheSameLetterAppearsTwice (b:xs)
     | otherwise = (not . T.null . snd $ T.pack [a, b] `T.breakOn` T.pack xs) || aPairOfTheSameLetterAppearsTwice (b:xs)
 aPairOfTheSameLetterAppearsTwice _ = False
+
+-- >>> getFirstRepeating "abcdef"
+-- Nothing
+-- >>> getFirstRepeating "abcdcef"
+-- Just 'c'
+-- >>> getFirstRepeating [1,2,3,4,5,2,5,6,1]
+-- Just 2
+getFirstRepeating :: Ord a => [a] -> Maybe a
+getFirstRepeating list = getFirstRepeatingWithAlreadyVisited list Set.empty
+  where
+    getFirstRepeatingWithAlreadyVisited [] _ = Nothing
+    getFirstRepeatingWithAlreadyVisited (x:xs) alreadyVisited
+      | x `Set.member` alreadyVisited = Just x
+      | otherwise = getFirstRepeatingWithAlreadyVisited xs (Set.insert x alreadyVisited)
+
+
+-- >>> getNextChar 'a'
+-- 'b'
+-- >>> getNextChar 'z'
+-- 'a'
+getNextChar :: Char -> Char
+getNextChar 'z' = 'a'
+getNextChar c = toEnum . (+1) . fromEnum $ c
+
+-- >>> getNextNthChar 51 'z'
+-- 'y'
+getNextNthChar :: Int -> Char -> Char
+getNextNthChar n c = do
+  let nextLetter = fromEnum 'a' + rem (fromEnum c - fromEnum 'a' + n) 26
+  toEnum nextLetter

@@ -17,6 +17,11 @@ import Year2015.Day12 qualified (runDay)
 import Year2015.Day13 qualified (runDay)
 import Year2015.Day14 qualified (runDay)
 import Year2015.Day15 qualified (runDay)
+import Year2016.Day01 qualified (runDay)
+import Year2016.Day02 qualified (runDay)
+import Year2016.Day03 qualified (runDay)
+import Year2016.Day04 qualified (runDay)
+import Year2016.Day05 qualified (runDay)
 import Year2022.Day01 qualified (runDay)
 import Year2022.Day13 qualified (runDay)
 import Year2022.Day14 qualified (runDay)
@@ -40,7 +45,8 @@ yearDaysMap :: Map Year (Map DayNumber Day)
 yearDaysMap =
   fromList
     [ (2015, year2015),
-      (2022, year2022)
+      (2022, year2022),
+      (2016, year2016)
     ]
 
 year2015 :: Map DayNumber Day
@@ -80,4 +86,14 @@ year2022 =
       (23, Year2022.Day23.runDay),
       (24, Year2022.Day24.runDay),
       (25, Year2022.Day25.runDay)
+    ]
+
+year2016 :: Map DayNumber Day
+year2016 =
+  fromList
+    [ (1, Year2016.Day01.runDay),
+      (2, Year2016.Day02.runDay),
+      (3, Year2016.Day03.runDay),
+      (4, Year2016.Day04.runDay),
+      (5, Year2016.Day05.runDay)
     ]

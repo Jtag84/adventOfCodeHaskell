@@ -16,6 +16,19 @@ data Direction =
     | UpD 
     deriving(Eq, Show, Enum, Ord)
 
+data CardinalDirection =
+      East
+    | South
+    | West
+    | North
+    deriving(Eq, Show, Enum, Ord)
+
+toCardinalDirection :: Direction -> CardinalDirection
+toCardinalDirection = toEnum . fromEnum 
+
+toDirection :: CardinalDirection -> Direction
+toDirection = toEnum . fromEnum 
+
 data Rotation = Clockwise | CounterClockwise
     deriving(Eq, Show)
 
@@ -24,6 +37,17 @@ rotate Clockwise UpD = RightD
 rotate Clockwise direction = succ direction
 rotate CounterClockwise RightD = UpD
 rotate CounterClockwise direction = pred direction
+
+rotateCardinal :: Rotation -> CardinalDirection -> CardinalDirection
+rotateCardinal rotation cardinalDirection = toCardinalDirection $ rotate rotation (toDirection cardinalDirection)
+
+moveInCardinalDirection :: Coordinate -> CardinalDirection -> Int -> Coordinate
+moveInCardinalDirection coordinate North numberNorth = modifyY (+ (-numberNorth)) coordinate
+moveInCardinalDirection coordinate East numberEast = modifyX (+ numberEast) coordinate
+moveInCardinalDirection coordinate West numberWest = modifyX (+ (-numberWest)) coordinate
+moveInCardinalDirection coordinate South numberSouth = modifyY (+ numberSouth) coordinate
+
+moveInDirection coordinate direction = moveInCardinalDirection coordinate (toCardinalDirection direction)
 
 toMatrixCoordinate :: Coordinate -> (Int, Int)
 toMatrixCoordinate (XY (x, y)) = (y + 1, x + 1)

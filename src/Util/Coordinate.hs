@@ -122,5 +122,9 @@ getSouthWest (XY (x,y)) = XY (x - 1,y + 1)
 getWest (XY (x,y)) = XY (x - 1,y)
 getEast (XY (x,y)) = XY (x + 1,y)
 
+-- >>> getAroundCoordinatesIncludingDiagonals (XY (0,0))
+-- [XY (0,-1),XY (1,-1),XY (1,0),XY (1,1),XY (0,1),XY (-1,1),XY (-1,0),XY (-1,-1)]
+getAroundCoordinatesIncludingDiagonals coordinate = [getNorth, getNorthEast, getEast, getSouthEast, getSouth, getSouthWest, getWest, getNorthWest] <*> [coordinate]
+
 manhattanDistance :: Coordinate -> Coordinate -> Int
 manhattanDistance from to = abs (getX from - getX to) + abs (getY from - getY to)

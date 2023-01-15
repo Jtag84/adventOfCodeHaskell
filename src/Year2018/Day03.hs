@@ -69,11 +69,17 @@ findOverlappingCoordinates ((_,claim1Coordinates), (_,claim2Coordinates)) = Set.
 
 findAllOverlappingCoordinates = Set.unions . map findOverlappingCoordinates . getAllPairs 
 
+-- Part A:
+-- 116489
+-- (1.649099s)
 partA :: [(ClaimId, Set.Set Coordinate)] -> Int
 partA = Set.size . findAllOverlappingCoordinates
 
 ------------ PART B ------------
 
+-- Part B:
+-- [1260]
+-- (1.625788s)
 partB claims = do
     let overlappingCoordinates = findAllOverlappingCoordinates claims
     map fst $ filter (all (`Set.notMember` overlappingCoordinates) . snd) claims

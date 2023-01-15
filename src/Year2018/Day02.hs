@@ -27,6 +27,7 @@ import Util.Coordinate
 import Util.LinkedList
 import Util.Range
 import Util.Util qualified as U
+import Util.Util (getAllPairs)
 
 runDay :: R.Day
 runDay = R.runDay inputParser partA partB
@@ -53,8 +54,6 @@ partA boxIds = do
 
 getSimilarCharacters :: (String,String) -> String
 getSimilarCharacters (id1,id2) = map fst . filter (uncurry (==)) $ zip id1 id2
-
-getAllPairs list = [(x,y) | x <- list, y <- list, x < y]
 
 -- Part B:
 -- ["hhvsdkatysmiqjxunezgwcdpr"]

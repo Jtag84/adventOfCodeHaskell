@@ -143,3 +143,6 @@ getNextNthChar :: Int -> Char -> Char
 getNextNthChar n c = do
   let nextLetter = fromEnum 'a' + rem (fromEnum c - fromEnum 'a' + n) 26
   toEnum nextLetter
+
+getAllPairs :: Ord b => [b] -> [(b, b)]
+getAllPairs list = [(x,y) | x <- list, y <- list, x < y]

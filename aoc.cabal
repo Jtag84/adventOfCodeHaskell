@@ -56,6 +56,8 @@ library
       Year2017.Day01
       Year2017.Day02
       Year2017.Day03
+      Year2017.Day04
+      Year2017.Day05
       Year2022.Day01
       Year2022.Day13
       Year2022.Day14
@@ -86,6 +88,7 @@ library
   build-depends:
       aeson
     , ansi-terminal
+    , array
     , attoparsec
     , base >=4.7 && <5
     , bytestring
@@ -127,6 +130,7 @@ executable aoc-exe
       aeson
     , ansi-terminal
     , aoc
+    , array
     , attoparsec
     , base >=4.7 && <5
     , bytestring

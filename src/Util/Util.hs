@@ -135,7 +135,7 @@ getFirstRepeating list = getFirstRepeatingWithAlreadyVisited list Set.empty
 -- 'a'
 getNextChar :: Char -> Char
 getNextChar 'z' = 'a'
-getNextChar c = toEnum . (+1) . fromEnum $ c
+getNextChar c = succ c
 
 -- >>> getNextNthChar 51 'z'
 -- 'y'

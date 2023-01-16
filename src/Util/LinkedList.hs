@@ -127,4 +127,4 @@ removeNode (LLNode _ previousRef nextRef) = do
         LLNode _ _ nextNodeRef -> writeSTRef nextNodeRef nextNode
     case nextNode of
         Empty -> mempty
-        LLNode _ previousNodeRef _ -> writeSTRef previousNodeRef nextNode
+        LLNode _ previousNodeRef _ -> writeSTRef previousNodeRef previousNode

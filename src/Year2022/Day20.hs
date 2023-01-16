@@ -44,7 +44,7 @@ type Value = Int
 type EncryptedFile = [Value]
 type MixedFile = [Value]
 
-findFirstNextNodeWithValue :: Eq value => value -> Int -> MutableLinkedList value s -> ST s (Maybe (MutableLinkedList value s))
+findFirstNextNodeWithValue :: Eq value => value -> Int -> MutableLinkedList s value -> ST s (Maybe (MutableLinkedList s value))
 findFirstNextNodeWithValue _ _ Empty = return Nothing
 findFirstNextNodeWithValue value stopCounter startNode@(LLNode nodeValue _ nextReference )
     | value == nodeValue = return $ Just startNode
@@ -52,7 +52,7 @@ findFirstNextNodeWithValue value stopCounter startNode@(LLNode nodeValue _ nextR
         nextNode <- readSTRef nextReference
         findNext value nextNode (stopCounter - 1)
     where
-        findNext :: Eq value => value -> MutableLinkedList value s -> Int ->  ST s (Maybe (MutableLinkedList value s))
+        findNext :: Eq value => value -> MutableLinkedList s value -> Int ->  ST s (Maybe (MutableLinkedList s value))
         findNext valueToFind _ 0 = return Nothing
         findNext valueToFind Empty _ = return Nothing
         findNext valueToFind nextNode@(LLNode nextNodeValue _ furtherNextReference) nextCounter
@@ -79,7 +79,7 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
     where
         totalSize = length encryptedFile
 
-        mix :: MutableLinkedList Value s -> ST s (MutableLinkedList Value s)
+        mix :: MutableLinkedList s Value -> ST s (MutableLinkedList s Value)
         mix Empty = return Empty
         mix node@(LLNode value _ _)
             | value `rem` (totalSize - 1) == 0 = return node
@@ -120,7 +120,7 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
             previousNode <- readSTRef previousReference
             previous (times -1) previousNode
 
-        cyclicLinkNodes :: [MutableLinkedList Value s] -> ST s (MutableLinkedList Value s)
+        cyclicLinkNodes :: [MutableLinkedList s value] -> ST s (MutableLinkedList s value)
         cyclicLinkNodes [] = return Empty
         cyclicLinkNodes mutableNodes@(headOfMutableNode:rest) = do
             let shiftedList = rest <> [headOfMutableNode]
@@ -128,23 +128,23 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
             zipWithM_ linkToPrevious shiftedList mutableNodes
             return headOfMutableNode 
 
-        linkToNext :: MutableLinkedList Value s -> MutableLinkedList Value s -> ST s (MutableLinkedList Value s)
+        linkToNext :: MutableLinkedList s value -> MutableLinkedList s value -> ST s (MutableLinkedList s value)
         linkToNext nodeToModify@(LLNode _ _ nextReference) nodeToLinkTo = do
             writeSTRef nextReference nodeToLinkTo
             return nodeToModify
 
-        linkToPrevious :: MutableLinkedList Value s -> MutableLinkedList Value s -> ST s (MutableLinkedList Value s)
+        linkToPrevious :: MutableLinkedList s value -> MutableLinkedList s value -> ST s (MutableLinkedList s value)
         linkToPrevious nodeToModify@(LLNode _ previousReference _) nodeToLinkTo = do
             writeSTRef previousReference nodeToLinkTo
             return nodeToModify
 
-        toMutableNode :: Value -> ST s (MutableLinkedList Value s)
+        toMutableNode :: Value -> ST s (MutableLinkedList s Value)
         toMutableNode value = do
             previousNode <- newSTRef Empty
             nextNode <- newSTRef Empty
             return $ LLNode value previousNode nextNode
 
-        toMixedFile :: MutableLinkedList Value s -> Int -> ST s MixedFile
+        toMixedFile :: MutableLinkedList s Value -> Int -> ST s MixedFile
         toMixedFile _ 0 = return []
         toMixedFile Empty _ = return []
         toMixedFile (LLNode value _ nextReference) size = do

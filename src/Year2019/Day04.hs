@@ -29,12 +29,7 @@ import Util.Range
 import Util.Util qualified as U
 
 runDay :: R.Day
-runDay = R.runDay inputParser partA partB
-
------------- PARSER ------------
-
-inputParser :: Parser Text
-inputParser = takeText
+runDay = R.runDay takeText partA partB
 
 ------------ PART A ------------
 startRange = 197487

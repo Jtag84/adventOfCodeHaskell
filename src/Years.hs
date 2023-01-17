@@ -35,6 +35,7 @@ import Year2018.Day05 qualified (runDay)
 import Year2019.Day01 qualified (runDay)
 import Year2019.Day02 qualified (runDay)
 import Year2019.Day03 qualified (runDay)
+import Year2019.Day04 qualified (runDay)
 import Year2022.Day01 qualified (runDay)
 import Year2022.Day13 qualified (runDay)
 import Year2022.Day14 qualified (runDay)
@@ -139,5 +140,6 @@ year2019 =
   fromList
     [ (1, Year2019.Day01.runDay),
       (2, Year2019.Day02.runDay),
-      (3, Year2019.Day03.runDay)
+      (3, Year2019.Day03.runDay),
+      (4, Year2019.Day04.runDay)
     ]

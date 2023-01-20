@@ -5,6 +5,7 @@ import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text qualified as T
 import Debug.Trace (trace)
+import Data.List (foldl')
 
 {-
 This module contains a series of miscellaneous utility functions that I have found helpful in the past.
@@ -146,3 +147,9 @@ getNextNthChar n c = do
 
 getAllPairs :: Ord b => [b] -> [(b, b)]
 getAllPairs list = [(x,y) | x <- list, y <- list, x < y]
+
+
+-- >>> bitsToInt [1,0,1]
+-- 5
+bitsToInt :: (Num a) => [a] -> a
+bitsToInt = foldl' (\currentConversion bit -> currentConversion * 2 + bit) 0

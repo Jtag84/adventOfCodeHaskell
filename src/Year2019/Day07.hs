@@ -50,6 +50,9 @@ runAmplifiersPartA amplifierControllerSoftware inputs = do
     let ampE = executeAmplifierControllerSoftware amplifierControllerSoftware [inputs !! 4, (head . snd) ampD]
     snd ampE
     
+-- Part A:
+-- [45730]
+-- (0.016316s)    
 partA amplifierControllerSoftware = maximum . map (runAmplifiersPartA amplifierControllerSoftware) . permutations $ [0,1,2,3,4]
 
 ------------ PART B ------------
@@ -127,4 +130,7 @@ runAmplifiersPartB amplifierControllerSoftware phases = do
     let init = initializeAmplifiers amplifierControllerSoftware phases 0 
     snd <$> (last . takeWhile isRight . iterate (runAmplifiersUntilNextOutput . fromRight (error "shouldn't happen")) $ Right init)
 
+-- Part B:
+-- Right 5406484
+-- (0.056415s)
 partB amplifierControllerSoftware = maximum . map (runAmplifiersPartB amplifierControllerSoftware) . permutations $ [5,6,7,8,9]

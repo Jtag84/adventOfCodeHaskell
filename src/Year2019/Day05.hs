@@ -1,4 +1,4 @@
-module Year2019.Day05 (runDay) where
+module Year2019.Day05 where
 
 import Algorithm.Search
 import Control.Applicative.Combinators

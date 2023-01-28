@@ -47,6 +47,7 @@ import Year2019.Day06 qualified (runDay)
 import Year2019.Day07 qualified (runDay)
 import Year2020.Day05 qualified (runDay)
 import Year2020.Day06 qualified (runDay)
+import Year2020.Day07 qualified (runDay)
 import Year2022.Day01 qualified (runDay)
 import Year2022.Day13 qualified (runDay)
 import Year2022.Day14 qualified (runDay)
@@ -169,5 +170,6 @@ year2020 :: Map DayNumber Day
 year2020 =
   fromList
     [ (5, Year2020.Day05.runDay),
-      (6, Year2020.Day06.runDay)
+      (6, Year2020.Day06.runDay),
+      (7, Year2020.Day07.runDay)
     ]

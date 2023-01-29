@@ -40,6 +40,7 @@ import Year2018.Day04 qualified (runDay)
 import Year2018.Day05 qualified (runDay)
 import Year2018.Day06 qualified (runDay)
 import Year2018.Day07 qualified (runDay)
+import Year2018.Day08 qualified (runDay)
 import Year2019.Day01 qualified (runDay)
 import Year2019.Day02 qualified (runDay)
 import Year2019.Day03 qualified (runDay)
@@ -155,7 +156,8 @@ year2018 =
       (4, Year2018.Day04.runDay),
       (5, Year2018.Day05.runDay),
       (6, Year2018.Day06.runDay),
-      (7, Year2018.Day07.runDay)
+      (7, Year2018.Day07.runDay),
+      (8, Year2018.Day08.runDay)
     ]
 
 year2019 :: Map DayNumber Day

@@ -128,3 +128,14 @@ removeNode (LLNode _ previousRef nextRef) = do
     case nextNode of
         Empty -> mempty
         LLNode _ previousNodeRef _ -> writeSTRef previousNodeRef previousNode
+
+-- >>> runST $ fromList [1,2,3,4,5] >>= \list -> toMutableNode 9 >>= \nodeToInsert -> insertNodeAfter nodeToInsert list >> toList list
+-- [1,9,2,3,4,5]
+insertNodeAfter :: MutableLinkedList s value -> MutableLinkedList s value -> ST s ()
+insertNodeAfter nodeToInsert afterNode = do
+    nextAfterNode <- nextNode afterNode
+    linkToNext afterNode nodeToInsert
+    linkToPrevious nodeToInsert afterNode
+    linkToPrevious nextAfterNode nodeToInsert
+    linkToNext nodeToInsert nextAfterNode
+    return ()

@@ -23,6 +23,9 @@ data CardinalDirection =
     | North
     deriving(Eq, Show, Enum, Ord)
 
+addCoordinates coordinate1 coordinate2 = modifyX (\x -> x + getX coordinate2) . modifyY (\y -> y + getY coordinate2) $ coordinate1
+subtractCoordinates coordinate1 coordinate2 = modifyX (\x -> x - getX coordinate2) . modifyY (\y -> y - getY coordinate2) $ coordinate1
+
 toCardinalDirection :: Direction -> CardinalDirection
 toCardinalDirection = toEnum . fromEnum 
 
@@ -101,17 +104,29 @@ modifyRow = modifyX
 modifyCol :: (Int -> Int) -> Coordinate -> Coordinate
 modifyCol = modifyY
 
-minX :: Vector Coordinate -> Int
-minX = minimum . Vec.map getX
+minX :: (Foldable t, Functor t) => t Coordinate -> Int
+minX = minimum . fmap getX
 
-maxX :: Vector Coordinate -> Int
-maxX = maximum . Vec.map getX
+maxX :: (Foldable t, Functor t) => t Coordinate -> Int
+maxX = maximum . fmap getX
 
-minY :: Vector Coordinate -> Int
-minY = minimum . Vec.map getY
+minY :: (Foldable t, Functor t) => t Coordinate -> Int
+minY = minimum . fmap getY
 
-maxY :: Vector Coordinate -> Int
-maxY = maximum . Vec.map getY
+maxY ::(Foldable t, Functor t) => t Coordinate -> Int
+maxY = maximum . fmap getY
+
+minRow :: (Foldable t, Functor t) => t Coordinate -> Int
+minRow = minimum . fmap getRow
+
+maxRow ::(Foldable t, Functor t) => t Coordinate -> Int
+maxRow = maximum . fmap getRow
+
+minCol :: (Foldable t, Functor t) => t Coordinate -> Int
+minCol = minimum . fmap getCol
+
+maxCol ::(Foldable t, Functor t) => t Coordinate -> Int
+maxCol = maximum . fmap getCol
 
 getNorth (XY (x,y)) = XY (x,y - 1)
 getNorthEast (XY (x,y)) = XY (x + 1,y - 1)

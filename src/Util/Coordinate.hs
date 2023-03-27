@@ -32,8 +32,8 @@ toCardinalDirection = toEnum . fromEnum
 toDirection :: CardinalDirection -> Direction
 toDirection = toEnum . fromEnum 
 
-data Rotation = Clockwise | CounterClockwise
-    deriving(Eq, Show)
+data Rotation = CounterClockwise | Clockwise
+    deriving(Eq, Show, Enum)
 
 rotate :: Rotation -> Direction -> Direction
 rotate Clockwise UpD = RightD
@@ -143,3 +143,15 @@ getAroundCoordinatesIncludingDiagonals coordinate = [getNorth, getNorthEast, get
 
 manhattanDistance :: Coordinate -> Coordinate -> Int
 manhattanDistance from to = abs (getX from - getX to) + abs (getY from - getY to)
+
+
+-- >>> normalizeCoordinates id const [XY (-1,-1), XY(2,2)] 
+-- [XY (0,0),XY (3,3)]
+-- >>> normalizeCoordinates id const [XY (10,10), XY(2,2)] 
+-- [XY (8,8),XY (0,0)]
+normalizeCoordinates :: (a -> Coordinate) -> (Coordinate -> a -> a) -> [a] -> [a]
+normalizeCoordinates coordinateGetter coordinateSetter coordinatesDataList  = do
+    let coordinates = map coordinateGetter coordinatesDataList
+    let minXPosition = minX coordinates
+    let minYPosition = minY coordinates
+    map (\coordinatesData -> coordinateSetter (coordinateGetter coordinatesData `subtractCoordinates` XY(minXPosition, minYPosition)) coordinatesData) coordinatesDataList

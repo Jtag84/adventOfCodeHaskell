@@ -138,16 +138,16 @@ executeOpcodes pc relativeBase inputs opcodes currentOutputs
 -- (fromList [(0,109),(1,1),(2,204),(3,-1),(4,1001),(5,100),(6,1),(7,100),(8,1008),(9,100),(10,16),(11,101),(12,99),(13,1006),(14,101),(15,0),(16,99),(100,1),(101,0)],12,1,[109])
 -- >>> runBoost 1 [109,1000,109,-3,1101,1,1,1000,203,3,204,3,99]
 -- (fromList [(0,109),(1,1000),(2,109),(3,-3),(4,1101),(5,1),(6,1),(7,1000),(8,203),(9,3),(10,204),(11,3),(12,99),(1000,1)],12,997,[1])
-runBoost input opcodes = executeOpcodes 0 0 [input] (Map.fromList $ zip [0..] opcodes) [] 
+runIntCodeProgram inputs opcodes = executeOpcodes 0 0 inputs (Map.fromList $ zip [0..] opcodes) [] 
 
 ------------ PART A ------------
 -- Part A:
 -- [3906448201]
 -- (0.002342s)
-partA  = sel4 . runBoost 1
+partA  = sel4 . runIntCodeProgram [1]
 
 ------------ PART B ------------
 -- Part B:
 -- [59785]
 -- (1.354287s)
-partB = sel4 . runBoost 2
+partB = sel4 . runIntCodeProgram [2]

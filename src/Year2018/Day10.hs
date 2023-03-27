@@ -67,12 +67,7 @@ parsePositionVelocity = (,) <$> parsePosition <* space <*> parseVelocity <* (end
 oneSecondPassing :: (Lights, Seconds) -> (Lights, Seconds)
 oneSecondPassing (lights, seconds) = (normalize . map (\(position, velocity) -> (position `addCoordinates` velocity, velocity)) $ lights, seconds + 1)
     where
-        normalize positionVelocities = do
-            let positions = map fst positionVelocities
-            let minXPosition = minX positions
-            let minYPosition = minY positions
-            map (\(position, velocity) -> (position `subtractCoordinates` XY(minXPosition, minYPosition), velocity)) positionVelocities
-
+        normalize = normalizeCoordinates fst (\newPosition (position, velocity) -> (newPosition, velocity))
 
 getMessage lights = do
     let message = until (withinDisplay . map fst . fst) oneSecondPassing (lights, 0)

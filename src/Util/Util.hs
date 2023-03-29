@@ -6,6 +6,7 @@ import Data.Set qualified as Set
 import Data.Text qualified as T
 import Debug.Trace (trace)
 import Data.List (foldl')
+import Data.Matrix qualified as M
 
 {-
 This module contains a series of miscellaneous utility functions that I have found helpful in the past.
@@ -153,3 +154,12 @@ getAllPairs list = [(x,y) | x <- list, y <- list, x < y]
 -- 5
 bitsToInt :: (Num a) => [a] -> a
 bitsToInt = foldl' (\currentConversion bit -> currentConversion * 2 + bit) 0
+
+
+newtype UnShow = UnShow String
+
+instance Show UnShow where
+    show (UnShow s) = s
+
+prettyPrintMatrix :: M.Matrix String -> M.Matrix UnShow
+prettyPrintMatrix = M.mapPos (\(_,_) a -> UnShow a)

@@ -32,7 +32,7 @@ import Util.Util qualified as U
 import Year2019.IntCodeComputer
 import Data.Bifunctor (Bifunctor(bimap))
 import qualified Data.Text as T
-import Util.Util (prettyPrintMatrix)
+import Util.Util (mapToPrettyPrintMatrix)
 import Safe (headMay)
 
 runDay :: R.Day
@@ -125,13 +125,7 @@ showScreen :: ProgramState -> (Maybe Score, M.Matrix U.UnShow)
 showScreen programState = do
     let outputs = getOutputs programState
     let (score, tiles) = toScoreAndTiles (Nothing, []) outputs
-    let matrixTiles = map (bimap toMatrixCoordinate show) tiles
-    let tilesMap = Map.fromList . reverse $ matrixTiles -- need to reverse the outputs so that the last tile output will be kept (in the ouputs the head is the last)
-    let positions = map fst matrixTiles
-    let rowSize = maximum $ map fst positions
-    let colSize = maximum $ map snd positions
-    let screen = M.matrix rowSize colSize (tilesMap Map.!)
-    (score, prettyPrintMatrix screen)
+    (score, mapToPrettyPrintMatrix show Wall (Map.fromList tiles))
 
 stay :: PaddleDirection
 stay = 0

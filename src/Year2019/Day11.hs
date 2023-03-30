@@ -35,7 +35,7 @@ import Year2019.IntCodeComputer
       clearOutputs,
       executeOneStepIntCodeProgram,
       opcodesParser, executeUntilNOuputsOrStopped )
-import Util.Util (prettyPrintMatrix)
+import Util.Util (mapToPrettyPrintMatrix)
 
 runDay :: R.Day
 runDay = R.runDay opcodesParser partA partB
@@ -86,13 +86,9 @@ partA = Map.size . sel1 . executeAllPaintingProgram BlackPanel
 -- └                                                                                       ┘
 -- ZCGRHKLB
 -- (0.031932s)
-partB program = prettyPrintMatrix $ M.matrix rowSize colSize (\matrixCoordinates -> [Map.findWithDefault ' ' matrixCoordinates hullGridMatrixResultMap])
+partB program = mapToPrettyPrintMatrix (:[]) ' ' hullGridResultMap
     where
-        hullGridMatrixResultMap = Map.fromList $ map (\(coordinates, color) -> (toMatrixCoordinate coordinates, if color == BlackPanel then ' ' else '■')) hullGridResult
-        hullGridResult = normalizeCoordinates fst (\newPosition (position, color) -> (newPosition, color))
-                        . Map.toList . sel1 
+        hullGridResultMap = Map.fromList $ map (\(coordinates, color) -> (coordinates, if color == BlackPanel then ' ' else '■')) hullGridResult
+        hullGridResult = Map.toList . sel1 
                         . executeAllPaintingProgram WhitePanel
                         $ program
-        coordinates = map fst hullGridResult
-        rowSize = maxRow coordinates
-        colSize = maxCol coordinates

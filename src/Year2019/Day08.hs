@@ -27,6 +27,7 @@ import Util.Coordinate
 import Util.LinkedList
 import Util.Range
 import Util.Util qualified as U
+import Util.Util (prettyPrintMatrix)
 
 runDay :: R.Day
 runDay = R.runDay inputParser partA partB
@@ -58,16 +59,16 @@ partA layers = do
 ------------ PART B ------------
 
 -- Part B:
--- ┌                                                                                                     ┐
--- │ '#' ' ' ' ' '#' ' ' '#' '#' '#' '#' ' ' '#' ' ' ' ' ' ' '#' ' ' '#' '#' ' ' ' ' '#' ' ' ' ' '#' ' ' │
--- │ '#' ' ' ' ' '#' ' ' '#' ' ' ' ' ' ' ' ' '#' ' ' ' ' ' ' '#' '#' ' ' ' ' '#' ' ' '#' ' ' '#' ' ' ' ' │
--- │ '#' '#' '#' '#' ' ' '#' '#' '#' ' ' ' ' ' ' '#' ' ' '#' ' ' '#' ' ' ' ' '#' ' ' '#' '#' ' ' ' ' ' ' │
--- │ '#' ' ' ' ' '#' ' ' '#' ' ' ' ' ' ' ' ' ' ' ' ' '#' ' ' ' ' '#' '#' '#' '#' ' ' '#' ' ' '#' ' ' ' ' │
--- │ '#' ' ' ' ' '#' ' ' '#' ' ' ' ' ' ' ' ' ' ' ' ' '#' ' ' ' ' '#' ' ' ' ' '#' ' ' '#' ' ' '#' ' ' ' ' │
--- │ '#' ' ' ' ' '#' ' ' '#' ' ' ' ' ' ' ' ' ' ' ' ' '#' ' ' ' ' '#' ' ' ' ' '#' ' ' '#' ' ' ' ' '#' ' ' │
--- └                                                                                                     ┘
--- (0.000649s)
-partB = M.fromList pixelHeight pixelWidth . map (toPixel . head . dropWhile (== 2)) . transpose
+-- ┌                                                   ┐
+-- │ ■     ■   ■ ■ ■ ■   ■       ■   ■ ■     ■     ■   │
+-- │ ■     ■   ■         ■       ■ ■     ■   ■   ■     │
+-- │ ■ ■ ■ ■   ■ ■ ■       ■   ■   ■     ■   ■ ■       │
+-- │ ■     ■   ■             ■     ■ ■ ■ ■   ■   ■     │
+-- │ ■     ■   ■             ■     ■     ■   ■   ■     │
+-- │ ■     ■   ■             ■     ■     ■   ■     ■   │
+-- └                                                   ┘
+-- (0.000485s)
+partB = prettyPrintMatrix . M.fromList pixelHeight pixelWidth . map (toPixel . head . dropWhile (== 2)) . transpose
     where
-        toPixel 0 = ' '
-        toPixel 1 = '#'
+        toPixel 0 = " "
+        toPixel 1 = "■"

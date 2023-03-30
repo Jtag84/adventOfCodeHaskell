@@ -124,6 +124,7 @@ partA opcodes = do
     (shortestNumberOfMoveToOxygenTank, mapToPrettyPrintMatrix show Unknown sectionMapWithRobotPath)
     
 ------------ PART B ------------
+
 findFurthestPositionFromOxygenTank :: RobotState -> State RobotCache Bool
 findFurthestPositionFromOxygenTank (position, _) = do
         cache <- get

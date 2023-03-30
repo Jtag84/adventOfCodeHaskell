@@ -7,6 +7,8 @@ import Data.Text qualified as T
 import Debug.Trace (trace)
 import Data.List (foldl')
 import Data.Matrix qualified as M
+import Util.Coordinate (Coordinate, toMatrixCoordinate, normalizeCoordinates)
+import Data.Bifunctor (Bifunctor(bimap))
 
 {-
 This module contains a series of miscellaneous utility functions that I have found helpful in the past.
@@ -160,6 +162,18 @@ newtype UnShow = UnShow String
 
 instance Show UnShow where
     show (UnShow s) = s
-
+    
 prettyPrintMatrix :: M.Matrix String -> M.Matrix UnShow
 prettyPrintMatrix = M.mapPos (\(_,_) a -> UnShow a)
+
+mapToPrettyPrintMatrix :: (a -> String) -> a -> Map.Map Coordinate a -> M.Matrix UnShow
+mapToPrettyPrintMatrix elementConversionFunction defaultElement coordinateMap = do
+    let normalizedCoordinates = normalize . Map.toList $ coordinateMap
+    let coordinateElementList = map (bimap toMatrixCoordinate (UnShow . elementConversionFunction)) normalizedCoordinates
+    let coordinates = map fst coordinateElementList
+    let rowSize = maximum $ map fst coordinates
+    let colSize = maximum $ map snd coordinates
+    let coordinateElementMap = Map.fromList coordinateElementList
+    M.matrix rowSize colSize (\matrixCoordinate -> Map.findWithDefault (UnShow . elementConversionFunction $ defaultElement) matrixCoordinate coordinateElementMap) 
+    where
+      normalize = normalizeCoordinates fst (\newPosition (position, color) -> (newPosition, color))

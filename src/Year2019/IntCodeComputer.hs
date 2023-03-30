@@ -19,8 +19,10 @@ data ProgramState =
       Running ProgramCounter RelativeBase Inputs IntCodeProgram Outputs
     | Stopped ProgramCounter RelativeBase Inputs IntCodeProgram Outputs
     | NeedInput ProgramCounter RelativeBase Inputs IntCodeProgram Outputs
+    deriving(Eq, Show, Ord)
 
-    deriving(Eq, Show)
+startProgramState :: [Opcode] -> ProgramState
+startProgramState opcodes = Running 0 0 [] (Map.fromList $ zip [0..] opcodes) []
 
 isProgramNeedInput :: ProgramState -> Bool
 isProgramNeedInput (Running {}) = False
@@ -106,7 +108,7 @@ executeOneStepIntCodeProgram (Running pc relativeBase inputs opcodes currentOutp
     -- set relative base
     | getFilteredOpcode == 9 = Running (pc + 2) (relativeBase + getFirstValue) inputs opcodes currentOutputs
 
-    | otherwise = error "wrong opcode"
+    | otherwise = error $ "wrong opcode " ++ show getFilteredOpcode
     where
         getFilteredOpcode = read [last $ show (opcodes Map.! pc)]
         executeOpcode operation = do

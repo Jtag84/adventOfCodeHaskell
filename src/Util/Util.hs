@@ -162,7 +162,10 @@ newtype UnShow = UnShow String
 
 instance Show UnShow where
     show (UnShow s) = s
-    
+
+prettyPrintMatrixWith :: (a -> String) -> M.Matrix a -> M.Matrix UnShow
+prettyPrintMatrixWith elementConversion = prettyPrintMatrix . M.mapPos (\ _ a -> elementConversion a)
+
 prettyPrintMatrix :: M.Matrix String -> M.Matrix UnShow
 prettyPrintMatrix = M.mapPos (\(_,_) a -> UnShow a)
 

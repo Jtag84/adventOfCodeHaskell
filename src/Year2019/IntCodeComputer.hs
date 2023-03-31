@@ -151,6 +151,12 @@ executeOneStepIntCodeProgram (Running pc relativeBase inputs opcodes currentOutp
 runIntCodeProgram :: Inputs -> [Opcode] -> ProgramState
 runIntCodeProgram inputs opcodes = until isProgramStopped executeOneStepIntCodeProgram (Running 0 0 inputs (Map.fromList $ zip [0..] opcodes) [])
 
+runIntCodeProgramWithMemoryUpdate :: (Int, Int) -> Inputs -> [Opcode] -> ProgramState
+runIntCodeProgramWithMemoryUpdate (memoryAddress, value) inputs opcodes = do
+    let memory = Map.fromList $ zip [0..] opcodes
+    let memoryUpdated = Map.alter (const . Just $ value) memoryAddress memory
+    until isProgramStopped executeOneStepIntCodeProgram (Running 0 0 inputs memoryUpdated [])
+
 executeUntilNOuputsOrStopped :: Int -> ProgramState -> ProgramState
 executeUntilNOuputsOrStopped numberOfOutputs = until hasNOutputsOrStopped executeOneStepIntCodeProgram
     where

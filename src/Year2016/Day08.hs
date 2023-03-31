@@ -37,8 +37,8 @@ data Pixel = On | Off
 
 instance Show Pixel where
     show :: Pixel -> String
-    show On  = "#"
-    show Off = "."
+    show On  = "■"
+    show Off = " "
 
 type Screen = M.Matrix Pixel
 type Width = Int

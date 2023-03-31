@@ -128,18 +128,24 @@ minCol = minimum . fmap getCol
 maxCol ::(Foldable t, Functor t) => t Coordinate -> Int
 maxCol = maximum . fmap getCol
 
-getNorth (XY (x,y)) = XY (x,y - 1)
-getNorthEast (XY (x,y)) = XY (x + 1,y - 1)
-getNorthWest (XY (x,y)) = XY (x - 1,y - 1)
-getSouth (XY (x,y)) = XY (x,y + 1)
-getSouthEast (XY (x,y)) = XY (x + 1,y + 1)
-getSouthWest (XY (x,y)) = XY (x - 1,y + 1)
-getWest (XY (x,y)) = XY (x - 1,y)
-getEast (XY (x,y)) = XY (x + 1,y)
+getNorth = modifyY (+ (-1))
+getSouth = modifyY (+ 1)
+getWest = modifyX (+ (-1))
+getEast = modifyX (+ 1)
+getNorthEast = getNorth . getEast
+getNorthWest = getNorth . getWest
+getSouthEast = getSouth . getEast
+getSouthWest = getSouth . getWest
 
 -- >>> getAroundCoordinatesIncludingDiagonals (XY (0,0))
 -- [XY (0,-1),XY (1,-1),XY (1,0),XY (1,1),XY (0,1),XY (-1,1),XY (-1,0),XY (-1,-1)]
 getAroundCoordinatesIncludingDiagonals coordinate = [getNorth, getNorthEast, getEast, getSouthEast, getSouth, getSouthWest, getWest, getNorthWest] <*> [coordinate]
+
+-- >>> getAroundCoordinatesExcludingDiagonals (XY (0,0))
+-- [XY (0,-1),XY (1,0),XY (0,1),XY (-1,0)]
+-- >>> getAroundCoordinatesExcludingDiagonals (Matrix (0,0))
+-- [Matrix (0,-1),Matrix (1,0),Matrix (0,1),Matrix (-1,0)]
+getAroundCoordinatesExcludingDiagonals coordinate = [getNorth, getEast, getSouth, getWest] <*> [coordinate]
 
 manhattanDistance :: Coordinate -> Coordinate -> Int
 manhattanDistance from to = abs (getX from - getX to) + abs (getY from - getY to)

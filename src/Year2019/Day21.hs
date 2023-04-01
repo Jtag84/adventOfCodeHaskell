@@ -1,4 +1,4 @@
-module YearXXXX.DayXX (runDay) where
+module Year2019.Day21 (runDay) where
 
 import Algorithm.Search
 import Control.Applicative.Combinators
@@ -27,21 +27,50 @@ import Util.Coordinate
 import Util.LinkedList
 import Util.Range
 import Util.Util qualified as U
+import Year2019.IntCodeComputer (opcodesParser, runIntCodeProgram, getOutputs, Opcode)
+import Util.Util (UnShow(UnShow))
 
 runDay :: R.Day
-runDay = R.runDay inputParser partA partB
+runDay = R.runDay opcodesParser partA partB
 
 ------------ TYPES ------------
 
------------- PARSER ------------
-
-inputParser :: Parser Text
-inputParser = takeText
 
 ------------ PART A ------------
+program =  "NOT A J\n" 
+        ++ "NOT B T\n"
+        ++ "OR T J\n"
+        ++ "NOT C T\n"
+        ++ "OR T J\n"
+        ++ "AND D J\n"
+        ++ "WALK\n"
 
-partA = id
+programAscii = map fromEnum program
+
+-- Part A:
+-- 19348840
+-- (0.120196s)
+partA = last . getOutputs . runIntCodeProgram programAscii
 
 ------------ PART B ------------
+programRun =   "NOT A J\n" 
+            ++ "NOT B T\n"
+            ++ "OR T J\n"
+            ++ "NOT C T\n"
+            ++ "OR T J\n"
+            ++ "AND D J\n"
+            ++ "NOT E T\n"
+            ++ "AND E T\n"
+            ++ "OR E T\n"
+            ++ "OR H T\n"
+            ++ "AND T J\n"
+            ++ "RUN\n" 
 
-partB = id
+programRunAscii = map fromEnum programRun
+
+-- to visualize when it didn't make it accross:
+-- UnShow . map toEnum . getOutputs . runIntCodeProgram programRunAscii
+-- Part B:
+-- 1141857182
+-- (2.752836s)
+partB = last . getOutputs . runIntCodeProgram programRunAscii

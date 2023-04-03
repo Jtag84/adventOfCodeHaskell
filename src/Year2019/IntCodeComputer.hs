@@ -24,6 +24,11 @@ data ProgramState =
 startProgramState :: [Opcode] -> ProgramState
 startProgramState opcodes = Running 0 0 [] (Map.fromList $ zip [0..] opcodes) []
 
+isProgramRunning :: ProgramState -> Bool
+isProgramRunning (Running {}) = True
+isProgramRunning (NeedInput {}) = False
+isProgramRunning (Stopped {}) = False
+
 isProgramNeedInput :: ProgramState -> Bool
 isProgramNeedInput (Running {}) = False
 isProgramNeedInput (NeedInput {}) = True
@@ -39,15 +44,30 @@ setInputs inputs (Running pc relativeBase _ opcodes outputs) = Running pc relati
 setInputs inputs (NeedInput pc relativeBase _ opcodes outputs) = Running pc relativeBase inputs opcodes outputs
 setInputs _ (Stopped {}) = error "Program already stopped"
 
+appendToInputs :: Inputs -> ProgramState -> ProgramState
+appendToInputs inputs (Running pc relativeBase inputsToAppend opcodes outputs) = Running pc relativeBase (inputsToAppend ++ inputs) opcodes outputs
+appendToInputs inputs (NeedInput pc relativeBase inputsToAppend opcodes outputs) = Running pc relativeBase (inputsToAppend ++ inputs) opcodes outputs
+appendToInputs _ (Stopped {}) = error "Program already stopped"
+
 getOutputs :: ProgramState -> Outputs
 getOutputs (Running _ _ _ _ outputs) = outputs
 getOutputs (Stopped _ _ _ _ outputs) = outputs
 getOutputs (NeedInput _ _ _ _ outputs) = outputs
 
+getInputs :: ProgramState -> Inputs
+getInputs (Running _ _ inputs _ _) = inputs
+getInputs (Stopped _ _ inputs _ _) = inputs
+getInputs (NeedInput _ _ inputs _ _) = inputs
+
 clearOutputs :: ProgramState -> ProgramState
 clearOutputs (Running pc relativeBase inputs opcodes _) = Running pc relativeBase inputs opcodes []
 clearOutputs (NeedInput pc relativeBase inputs opcodes _) = NeedInput pc relativeBase inputs opcodes []
 clearOutputs (Stopped pc relativeBase inputs opcodes _) = Stopped pc relativeBase inputs opcodes []
+
+clearIntCodeProgram :: ProgramState -> ProgramState
+clearIntCodeProgram (Running pc relativeBase inputs _ outputs) = Running pc relativeBase inputs Map.empty outputs
+clearIntCodeProgram (NeedInput pc relativeBase inputs _ outputs) = NeedInput pc relativeBase inputs Map.empty outputs
+clearIntCodeProgram (Stopped pc relativeBase inputs _ outputs) = Stopped pc relativeBase inputs Map.empty outputs
 
 data ParameterMode = Immediate | Relative | Position
     deriving(Eq, Show)

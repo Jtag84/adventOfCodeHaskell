@@ -44,4 +44,4 @@ partA = id
 
 ------------ PART B ------------
 
-partB = id
+partB = const "not implemented yet"

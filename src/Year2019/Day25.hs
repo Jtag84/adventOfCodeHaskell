@@ -37,10 +37,7 @@ runDay = R.runDay opcodesParser partA partB
 -- To manually play the game
 -- runDay = R.debugDayWithPrompt opcodesParser partA
 
------------- TYPES ------------
-
 ------------ PART A ------------
-
 
 -- not the most efficient but gives the correct solution. Found by playing it manually
 commands = map fromEnum . unlines $

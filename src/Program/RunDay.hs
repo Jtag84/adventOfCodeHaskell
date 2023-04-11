@@ -1,6 +1,4 @@
-{-# LANGUAGE TypeApplications #-}
-
-module Program.RunDay (runDay, Day, Verbosity (Quiet, Timings, Verbose)) where
+module Program.RunDay (runDay, debugDayWithPrompt, Day, Prompt, Verbosity (Quiet, Timings, Verbose)) where
 
 import Control.Exception (SomeException, catch)
 import Control.Monad.Except
@@ -69,3 +67,49 @@ runDay inputParser partA partB verbosity inputFile = do
         (,)
           (if successA then Just timeA else Nothing)
           (if successB then Just timeB else Nothing)
+
+type Prompt state = (String, state, state -> String -> (String, state))
+
+-- debug using a prompt, each line will be fed to the part being debugged
+debugDayWithPrompt :: Show i => Parser i -> (i -> Prompt state) -> Program.RunDay.Day
+debugDayWithPrompt inputParser part verbosity inputFile = do 
+  input <- runExceptT $ do
+    inputFileExists <- liftIO $ doesFileExist inputFile
+    fileContents <-
+      if inputFileExists
+        then liftIO $ readFile inputFile
+        else
+          throwError $
+            unwords
+              [ "I couldn't read the input!",
+                "I was expecting it to be at",
+                inputFile
+              ]
+    case parseOnly inputParser . pack $ fileContents of
+      Left e -> throwError $ "Parser failed to read input. Error:\n" ++ e
+      Right i -> do
+        when (verbosity == Verbose) $ do
+          liftIO $ putStrLn "Parser output:"
+          liftIO $ print i
+        return i
+
+  case input of
+    Left x -> withColor Red (putStrLn x) >> return (Nothing, Nothing)
+    Right puzzleInput -> do
+      time1 <- getCurrentTime
+      prompt $ part puzzleInput
+      time2 <- getCurrentTime
+      let time = realToFrac $ diffUTCTime time2 time1
+      return (Just time, Just time)
+
+  where
+      prompt :: Prompt state -> IO ()
+      prompt (currentOutput, currentState, promptFunction) = do
+          putStrLn currentOutput
+          input <- getLine
+          if input == "exit"
+                then putStrLn "Exit!"
+                else do
+                    let (newOutput, newState) = promptFunction currentState input
+                    prompt (newOutput, newState, promptFunction)
+

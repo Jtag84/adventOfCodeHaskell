@@ -74,7 +74,7 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
     allMutableNodes <- mapM toMutableNode encryptedFile
     headOfMutableLinkedList <- cyclicLinkNodes allMutableNodes
     forM_ [1..timesToMix] $ \_ -> mapM_ mix allMutableNodes
-    Just zeroNode <- findFirstNextNodeWithValue 0 totalSize headOfMutableLinkedList
+    zeroNode <- fromJust <$> findFirstNextNodeWithValue 0 totalSize headOfMutableLinkedList
     toMixedFile zeroNode totalSize
     where
         totalSize = length encryptedFile
@@ -84,7 +84,7 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
         mix node@(LLNode value _ _)
             | value `rem` (totalSize - 1) == 0 = return node
             | otherwise = do
-                let timesNext = if value > 0 
+                let timesNext = if value > 0
                                     then
                                         value `rem` (totalSize - 1)
                                     else
@@ -92,12 +92,16 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
                 nextNode <- next timesNext node
                 node `moveAfter` nextNode
 
+        moveAfter :: MutableLinkedList s Value -> MutableLinkedList s Value -> ST s (MutableLinkedList s Value)
         moveAfter Empty _ = return Empty
         moveAfter _ Empty = return Empty
         moveAfter nodeToMove@(LLNode _ toMovePreviousReference toMoveNextReference) afterNode@(LLNode _ _ afterNextReference) = do
-            previousNode@(LLNode _ _ previousNodeNextReference) <- readSTRef toMovePreviousReference
-            nextNode@(LLNode _ nexNodePreviousReference _) <- readSTRef toMoveNextReference
-            nextAfter@(LLNode _ afterNodePreviousReference _) <- readSTRef afterNextReference
+            previousNode <- readSTRef toMovePreviousReference
+            let previousNodeNextReference = getNextRefOrError previousNode
+            nextNode <- readSTRef toMoveNextReference
+            let nexNodePreviousReference = getPreviousRefOrError nextNode
+            nextAfter <- readSTRef afterNextReference
+            let afterNodePreviousReference = getPreviousRefOrError nextAfter
 
             writeSTRef previousNodeNextReference nextNode
             writeSTRef toMoveNextReference nextAfter
@@ -107,6 +111,14 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
             writeSTRef toMovePreviousReference afterNode
 
             return nodeToMove
+
+        getNextRefOrError node = case node of
+                                    (LLNode _ _ nextReference) -> nextReference
+                                    Empty -> error "should not be empty"
+
+        getPreviousRefOrError node = case node of
+                            (LLNode _ previousReference _) -> previousReference
+                            Empty -> error "should not be empty"
 
         next _ Empty = return Empty
         next 0 node = return node
@@ -126,7 +138,7 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
             let shiftedList = rest <> [headOfMutableNode]
             zipWithM_ linkToNext mutableNodes shiftedList
             zipWithM_ linkToPrevious shiftedList mutableNodes
-            return headOfMutableNode 
+            return headOfMutableNode
 
         linkToNext :: MutableLinkedList s value -> MutableLinkedList s value -> ST s (MutableLinkedList s value)
         linkToNext nodeToModify@(LLNode _ _ nextReference) nodeToLinkTo = do
@@ -152,7 +164,7 @@ mixEncryptedFile timesToMix encryptedFile = runST $ do
             (value:) <$> toMixedFile nextNode (size - 1)
 
 getGroveCoordinates :: MixedFile -> Int
-getGroveCoordinates mixedFile = 
+getGroveCoordinates mixedFile =
     sum $ map get [1000, 2000, 3000]
     where
         get = (mixedFile !!) . (`rem` length mixedFile )

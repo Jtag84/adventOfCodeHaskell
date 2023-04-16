@@ -1,4 +1,5 @@
 module Years (yearDaysMap) where
+import Year2018.Day11 qualified (runDay)
 
 import Data.Map (Map, fromList)
 import Program.RunDay (Day)
@@ -178,7 +179,7 @@ year2018 =
       (8, Year2018.Day08.runDay),
       (9, Year2018.Day09.runDay),
       (10, Year2018.Day10.runDay)
-    ]
+    , (11, Year2018.Day11.runDay)]
 
 year2019 :: Map DayNumber Day
 year2019 =

@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -76,6 +76,7 @@ library
       Year2018.Day08
       Year2018.Day09
       Year2018.Day10
+      Year2018.Day11
       Year2019.Day01
       Year2019.Day02
       Year2019.Day03
